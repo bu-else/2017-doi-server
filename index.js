@@ -83,11 +83,7 @@ function prepSMS(response,body) {
     if (success) {
       response.end("<Response></Response>");
     } else {
-      response.end("
-          <Response>
-            <Message>Internal server error. Failed to handle your request.</Message>
-          </Response>
-        ");
+      response.end("<Response><Message>Internal server error. Failed to handle your request.</Message></Response>");
     }
   }
 
@@ -116,11 +112,7 @@ function prepSMS(response,body) {
 
 function respondInvalidSMS(response) {
   response.setHeader('Content-Type', 'text/xml');
-  response.end("
-      <Response>
-        <Message>Invalid request. Failed to handle your request.</Message>
-      </Response>
-    ");
+  response.end("<Response><Message>Invalid request. Failed to handle your request.</Message></Response>");
 }
 
 function buildURL_GET(urlString){
