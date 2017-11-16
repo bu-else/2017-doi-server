@@ -87,7 +87,7 @@ function prepAddress(response,URL_GET) {
 }
 
 function prepSMS(response,URL_GET) {
-  console.log(URL_GET["Body"]);
+  console.log(URL_GET["Body"].split("\n"));
   console.log("CALLED");
   response.end("");
 }
