@@ -1,0 +1,11 @@
+{
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@google/maps": "^0.4.5",
+    "confidence": "^3.0.2",
+    "dotenv": "^4.0.0",
+    "twilio": "^3.9.3"
+  }
+}
