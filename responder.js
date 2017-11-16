@@ -10,8 +10,7 @@ const twilioClient = require('twilio')(
     process.env.TWILIO_TOKEN
 );
 
-function handleFirst(latLng, uuid) {
-    console.log(latLng);
+function handleLatLng(uuid,latLng,callback) {
     mapsClient.reverseGeocode({
             latlng: latLng,
             result_type: ['country', 'street_address'],
@@ -21,7 +20,9 @@ function handleFirst(latLng, uuid) {
         function (err, response) {
             console.log("RETURNED", response.json.results[0])
             if (!err) {
-                console.log(response);
+                if (response == "") {
+                     callback(false);
+                }
                 const address = response.json.results[0]["formatted_address"];
                 console.log("Address = " + address);
                 twilioClient.messages.create({
@@ -29,26 +30,26 @@ function handleFirst(latLng, uuid) {
                     to: process.env.BEN_NUMBER,
                     body: "This text is sent to report an opiate overdose at " + address + ". " + "This is emergency " + uuid +
                     ". This is an anonymous, machine generated text. Please do not reply."
-                }).then((messsage) => console.log(message.sid))
-                    .catch((messsage) => console.log(message.sid));
+                }).then((messsage) => callback(true))
+                    .catch((messsage) => callback(false));
 
             } else {
-                console.log("ERROR: " + err);
+                 callback(false);
             }
         }
     )
 }
 
-function handleSecond(address, zipcode, uuid) {
+function handleAddress(uuid, address, zipcode, callback) {
     twilioClient.messages.create({
         from: process.env.TWILIO_NUMBER,
         to: process.env.BEN_NUMBER,
         body: "Emergency " + uuid + " has recieved an updated address: " + address + ". Zipcode: " + zipcode
-    }).then((messsage) => console.log(message.sid))
-        .catch((messsage) => console.log(message.sid));
+    }).then((messsage) => callback(true))
+        .catch((messsage) => callback(false));
 }
 
 module.exports = {
-    handleFirst,
-    handleSecond
+    handleLatLng,
+    handleAddress
 };
