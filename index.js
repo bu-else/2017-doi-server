@@ -17,23 +17,31 @@ const requestHandler = (request, response) => {
   }
   URL_GET = buildURL_GET(request.url.toString())
 
+  const callback = (success) => {
+    if (success) {
+      response.end("Success")
+    } else {
+      response.statusCode = 500;
+      response.end("Internal server error");
+    }
+  }
+
   switch (result[1]) {
     case "latlng":
-      prepLatLng(response,URL_GET);
+      prepLatLng(URL_GET["UUID"], URL_GET["LatLng"],callback);
       break;
     case "address":
-      prepAddress(response,URL_GET);
+      prepAddress(URL_GET["UUID"], URL_GET["Zipcode"], URL_GET["Address"],callback)
       break;
     case "sms":
-      prepSMS(response,URL_GET);
+      prepSMS(response,URL_GET["Body"]);
+      break;
     default:
       response.statusCode = 404;
       response.end("Page not found");
   } 
 }
-function prepLatLng(response,URL_GET) {
-  const deviceID = URL_GET["UUID"];
-  const latLng = URL_GET["LatLng"];
+function prepLatLng(deviceID,latlng,callback) {
   if (deviceID == undefined || latLng == undefined) {
     response.statusCode = 400;
     response.end("Invalid request");
@@ -47,21 +55,10 @@ function prepLatLng(response,URL_GET) {
   }
   const emergencyID = idGen.makeByDevice(deviceID);
 
-  const callback = (success) => {
-    if (success) {
-      response.end("Success")
-    } else {
-      response.statusCode = 500;
-      response.end("Internal server error");
-    }
-  }
   responder.handleLatLng(emergencyID,latLng,callback);
 }
 
-function prepAddress(response,URL_GET) {
-  const deviceID = URL_GET["UUID"];
-  const zipcode = URL_GET["Zipcode"];
-  const rawAddress = URL_GET["Address"];
+function prepAddress(deviceID,zipcode,rawAddress,callback) {
   if (deviceID == undefined || rawAddress == undefined || zipcode == undefined) {
     response.statusCode = 400;
     response.end("Invalid request");
@@ -75,21 +72,55 @@ function prepAddress(response,URL_GET) {
     emergencyID = idGen.makeByDevice(deviceID);
   }
 
-  const callback = (success) => {
-    if (success) {
-      response.end("Success")
-    } else {
-      response.statusCode = 500;
-      response.end("Internal server error");
-    }
-  }
   responder.handleAddress(emergencyID,address,zipcode,callback);
 }
 
-function prepSMS(response,URL_GET) {
-  console.log(URL_GET["Body"].split("\n"));
-  console.log("CALLED");
-  response.end("");
+function prepSMS(response,body) {
+  results = body.split("\n");
+  
+  const callback = (success) => {
+    response.setHeader('Content-Type', 'text/xml');
+    if (success) {
+      response.end("<Response></Response>");
+    } else {
+      response.end("
+          <Response>
+            <Message>Internal server error. Failed to handle your request.</Message>
+          </Response>
+        ");
+    }
+  }
+
+  console.log(results);
+  switch (result[0]) {
+    case "latlng":
+      if (result.length != 3) {
+        respondInvalidSMS(response);
+        return
+      }
+      prepLatLng(response,response[1],response[2],callback);
+      break;
+    case "address":
+      if (result.length != 4) {
+        respondInvalidSMS(response);
+        return
+      }
+      prepAddress(response,response[1],response[2],response[3],callback)
+      break;
+    default:
+      respondInvalidSMS(response);
+      break;
+
+  }
+}
+
+function respondInvalidSMS(response) {
+  response.setHeader('Content-Type', 'text/xml');
+  response.end("
+      <Response>
+        <Message>Invalid request. Failed to handle your request.</Message>
+      </Response>
+    ");
 }
 
 function buildURL_GET(urlString){
