@@ -6,9 +6,6 @@ const idGen = require("./idgenerator.js");
 const uuidv4 = require('uuid/v4');
 
 const requestHandler = (request, response) => {
-  if (request.url.toString() == "") {
-    response.end("Welcome to the 2017-doi-app api");
-  }
   var result = request.url.toString().split("/");
   if (result.length != 3) {
     response.statusCode = 404;
@@ -41,7 +38,7 @@ const requestHandler = (request, response) => {
       response.end("Page not found");
   } 
 }
-function prepLatLng(deviceID,latlng,callback) {
+function prepLatLng(deviceID,latLng,callback) {
   if (deviceID == undefined || latLng == undefined) {
     response.statusCode = 400;
     response.end("Invalid request");
@@ -87,7 +84,6 @@ function prepSMS(response,body) {
     }
   }
 
-  console.log(result);
   switch (result[0]) {
     case "latlng":
       if (result.length != 3) {
