@@ -6,6 +6,9 @@ const idGen = require("./idgenerator.js");
 const uuidv4 = require('uuid/v4');
 
 const requestHandler = (request, response) => {
+  if (request.url.toString() == "") {
+    response.end("Welcome to the 2017-doi-app api");
+  }
   var result = request.url.toString().split("/");
   if (result.length != 3) {
     response.statusCode = 404;
@@ -15,8 +18,6 @@ const requestHandler = (request, response) => {
   URL_GET = buildURL_GET(request.url.toString())
 
   switch (result[1]) {
-    case "":
-      response.end("Welcome to the 2017-doi-app api")
     case "latlng":
       prepLatLng(response,URL_GET);
       break;
@@ -87,6 +88,7 @@ function prepAddress(response,URL_GET) {
 
 function prepSMS(response,URL_GET) {
   console.log(URL_GET["Body"]);
+  console.log("CALLED");
   response.end("");
 }
 
