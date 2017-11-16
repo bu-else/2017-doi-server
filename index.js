@@ -76,7 +76,7 @@ function prepAddress(deviceID,zipcode,rawAddress,callback) {
 }
 
 function prepSMS(response,body) {
-  results = body.split("\n");
+  result = body.split("\n");
   
   const callback = (success) => {
     response.setHeader('Content-Type', 'text/xml');
@@ -87,21 +87,21 @@ function prepSMS(response,body) {
     }
   }
 
-  console.log(results);
+  console.log(result);
   switch (result[0]) {
     case "latlng":
       if (result.length != 3) {
         respondInvalidSMS(response);
         return
       }
-      prepLatLng(response,response[1],response[2],callback);
+      prepLatLng(response,result[1],result[2],callback);
       break;
     case "address":
       if (result.length != 4) {
         respondInvalidSMS(response);
         return
       }
-      prepAddress(response,response[1],response[2],response[3],callback)
+      prepAddress(response,result[1],result[2],result[3],callback)
       break;
     default:
       respondInvalidSMS(response);
