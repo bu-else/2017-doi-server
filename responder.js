@@ -18,23 +18,22 @@ function handleLatLng(uuid,latLng,callback) {
             language: "EN"
         },
         function (err, response) {
-            console.log("RETURNED", response.json.results[0])
+            console.log("Maps Result=", response.json.results[0])
             if (!err) {
                 if (response == "") {
-                     callback(false);
+                     callback(false,"Internal server error.",500);
                 }
                 const address = response.json.results[0]["formatted_address"];
-                console.log("Address = " + address);
                 twilioClient.messages.create({
                     from: process.env.TWILIO_NUMBER,
                     to: process.env.BEN_NUMBER,
                     body: "This text is sent to report an opiate overdose at " + address + ". " + "This is emergency " + uuid +
                     ". This is an anonymous, machine generated text. Please do not reply."
-                }).then((messsage) => callback(true))
-                    .catch((messsage) => callback(false));
+                }).then((messsage) => callback(true,"Success.",200))
+                    .catch((messsage) => callback(false,"Internal server error.",500));
 
             } else {
-                 callback(false);
+                 callback(false,"Internal server error.",500);
             }
         }
     )
@@ -45,8 +44,8 @@ function handleAddress(uuid, address, zipcode, callback) {
         from: process.env.TWILIO_NUMBER,
         to: process.env.BEN_NUMBER,
         body: "Emergency " + uuid + " has recieved an updated address: " + address + ". Zipcode: " + zipcode
-    }).then((messsage) => callback(true))
-        .catch((messsage) => callback(false));
+    }).then((messsage) => callback(true,"Success.",200))
+        .catch((messsage) => callback(false,"Internal server error.",500));
 }
 
 module.exports = {
