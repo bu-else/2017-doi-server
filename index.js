@@ -7,15 +7,18 @@ const uuidv4 = require('uuid/v4');
 
 
 const requestHandler = (request, response) => {
+  if (request.url.toString()=="/") {
+    response.end("Wecome to the server of the 2017-doi-app!");
+  }
+  
+  callback = callbackCreator(response,false)
+
   var result = request.url.toString().split("/");
   if (result.length != 3) {
-    response.statusCode = 404;
-    response.end("Page not found");
+    callback(false,"Page not found.",404);
     return;
   }
   URL_GET = buildURL_GET(request.url.toString())
-
-  callback = callbackCreator(response,false)
 
   switch (result[1]) {
     case "latlng":
@@ -28,8 +31,8 @@ const requestHandler = (request, response) => {
       prepSMS(response,URL_GET["Body"]);
       break;
     default:
-      response.statusCode = 404;
-      response.end("Page not found");
+      callback(false,"Page not found.",404);
+      break;
   } 
 }
 function prepLatLng(deviceID,latLng,callback) {
