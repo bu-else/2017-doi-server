@@ -21,15 +21,12 @@ function handleLatLng(uuid,latLng,callback) {
             language: "EN"
         },
         function (err, response) {
-            console.log("Got back to me");
-            console.log(response.json.results);
-            console.log(Object.keys(response.json.results));
-            console.log(Object.keys(response.json.results).length);
-            console.log(Object.keys(response.json.results).length === 0);
-            if (!response.json.results) {
-                console.log("Nothing my guy");
+            if (Object.keys(response.json.results).length === 0) {
+                console.log("Empty Google Maps response.")
+                callback(false,"Internal server error.",500);
+                return;
             }
-            if (!err && response.json.results != []) {
+            if (!err) {
                 console.log("CALLED");
                 const address = response.json.results[0]["formatted_address"];
                 twilioClient.messages.create({
@@ -39,9 +36,8 @@ function handleLatLng(uuid,latLng,callback) {
                     ". This is an anonymous, machine generated text. Please do not reply."
                 }).then((messsage) => callback(true,"Success.",200))
                     .catch((messsage) => callback(false,"Internal server error.",500));
-
             } else {
-                console.log(response);
+                console.log(err)
                 callback(false,"Internal server error.",500);
             }
         }
