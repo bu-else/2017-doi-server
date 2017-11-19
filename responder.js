@@ -23,7 +23,7 @@ function handleLatLng(uuid,latLng,callback) {
         function (err, response) {
             console.log("Got back to me");
             console.log(response);
-            if (!err && response) {
+            if (!err && response.json.results) {
                 console.log("CALLED");
                 const address = response.json.results[0]["formatted_address"];
                 twilioClient.messages.create({
