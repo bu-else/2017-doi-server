@@ -48,21 +48,16 @@ function prepLatLng(deviceID,latLng,callback) {
   }
 
   var emergencyID;
-  console.log("A");
   try  {
     emergencyID = idGen.makeByDevice(deviceID);
-    console.log("B");
     idGen.setStageByDevice(deviceID,stageLatLng);
-    console.log("C");
   }
   catch (e) {
-    console.log(e);
     callback(false,"Internal server error.",500);
     return;
   }
 
   responder.handleLatLng(emergencyID,latLng,callback);
-  console.log("D");
 }
 
 function prepAddress(deviceID,zipcode,rawAddress,callback) {
