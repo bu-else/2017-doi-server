@@ -22,12 +22,11 @@ function handleLatLng(uuid,latLng,callback) {
         },
         function (err, response) {
             if (Object.keys(response.json.results).length === 0) {
-                console.log("Empty Google Maps response.")
+                console.log("Empty Google Maps response.");
                 callback(false,"Internal server error.",500);
                 return;
             }
             if (!err) {
-                console.log("CALLED");
                 const address = response.json.results[0]["formatted_address"];
                 twilioClient.messages.create({
                     from: process.env.TWILIO_NUMBER,
