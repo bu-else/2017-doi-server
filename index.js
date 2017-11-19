@@ -78,7 +78,7 @@ function prepAddress(deviceID,zipcode,rawAddress,callback) {
     callback(false,"Internal server error.",500);
     return;
   }
-
+  console.log("Got this far");
   responder.handleAddress(emergencyID,address,zipcode,callback);
 }
 
