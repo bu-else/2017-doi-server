@@ -5,6 +5,8 @@ const responder = require("./responder.js");
 const idGen = require("./idgenerator.js");
 const uuidv4 = require('uuid/v4');
 
+const stageLatLng = 1;
+const stageAddress = 2;
 
 const requestHandler = (request, response) => {
   if (request.url.toString()=="/") {
@@ -27,6 +29,9 @@ const requestHandler = (request, response) => {
     case "address":
       prepAddress(URL_GET["UUID"], URL_GET["Zipcode"], URL_GET["Address"],callback)
       break;
+    case "end":
+      endEmergency(URL_GET["UUID"],callback);
+      break;
     case "sms":
       prepSMS(response,URL_GET["Body"]);
       break;
@@ -35,18 +40,23 @@ const requestHandler = (request, response) => {
       break;
   } 
 }
+
 function prepLatLng(deviceID,latLng,callback) {
   if (deviceID == undefined || latLng == undefined) {
     callback(false,"Invalid request.",400);
-    return
+    return;
   }
 
-  if (idGen.getByDevice(deviceID) != undefined) {
-    response.statusCode = 409;
-    callback(false,"This device is already requesting an emergency.",409);
-    return
+  var emergencyID;
+  try  {
+    emergencyID = idGen.makeByDevice(deviceID);
+    idGen.setStageByDevice(deviceID,stageLatLng);
   }
-  const emergencyID = idGen.makeByDevice(deviceID);
+  catch (e) {
+    console.log(e);
+    callback(false,"Internal server error.",500);
+    return;
+  }
 
   responder.handleLatLng(emergencyID,latLng,callback);
 }
@@ -54,17 +64,40 @@ function prepLatLng(deviceID,latLng,callback) {
 function prepAddress(deviceID,zipcode,rawAddress,callback) {
   if (deviceID == undefined || rawAddress == undefined || zipcode == undefined) {
     callback(false,"Invalid request.",400);
-    return
+    return;
   }
   const address = rawAddress.replace(/\+/g," ");
 
-  var emergencyID = idGen.getByDevice(deviceID);
-  if (emergencyID == undefined) {
-    // Our requests came in out of order, so we will just generate this and block the other one
-    emergencyID = idGen.makeByDevice(deviceID);
+  var emergencyID;
+  try {
+    emergencyID = idGen.getByDevice(deviceID);
+    idGen.setStageByDevice(deviceID,stageAddress);
+  }
+  catch (e) {
+    console.log(e);
+    callback(false,"Internal server error.",500);
+    return;
   }
 
   responder.handleAddress(emergencyID,address,zipcode,callback);
+}
+
+function endEmergency(deviceID,callback) {
+   if (deviceID == undefined) {
+    callback(false,"Invalid request.",400);
+    return;
+  }
+
+  try {
+    const emergencyID = idGen.getByDevice(deviceID);
+    idGen.endByDevice(deviceID);
+  } catch (e) {
+    console.log(e);
+    callback(false,"Internal server error.",500);
+    return;
+  }
+
+  callback(true,"Success.",200);
 }
 
 function prepSMS(response,body) {
@@ -76,17 +109,23 @@ function prepSMS(response,body) {
     case "latlng":
       if (result.length != 3) {
         callback(false,"Invalid request.",400);
-        return
+        return;
       }
-      prepLatLng(response,result[1],result[2],callback);
+      prepLatLng(result[1],result[2],callback);
       break;
     case "address":
       if (result.length != 4) {
         callback(false,"Invalid request.",400);
-        return
+        return;
       }
-      prepAddress(response,result[1],result[2],result[3],callback)
+      prepAddress(result[1],result[2],result[3],callback)
       break;
+    case "end":
+      if (result.length != 2) {
+        callback(false,"Invalid request.",400);
+        return;
+      }
+      endEmergency(result[1],callback);
     default:
       callback(false,"Request not found.",404);
       break;
@@ -100,7 +139,7 @@ function callbackCreator(response,isSMS) {
       response.setHeader('Content-Type', 'text/xml');
       if (success) {
         response.end("<Response></Response>");
-        return
+        return;
       }
       response.end("<Response><Message>Error: " + code + ". " + text + " Failed to handle your request.</Response></Message>");
     }
@@ -110,14 +149,14 @@ function callbackCreator(response,isSMS) {
       response.statusCode = code;
       response.end(text);
     }
-    return callback
+    return callback;
   }
 }
 
 function buildURL_GET(urlString){
   var URL_GET = {};
   if(urlString.indexOf('?') == -1) {
-    return URL_GET
+    return URL_GET;
   }
   var query = urlString
                  .toString()
@@ -136,9 +175,9 @@ function buildURL_GET(urlString){
 const server = http.createServer(requestHandler);
 server.listen(port, (err) => {
   if (err) {
-    return console.log('something bad happened', err)
+    return console.log('something bad happened', err);
   }
-  console.log(`server is listening on ${port}`)
+  console.log(`server is listening on ${port}`);
 })
 
 
