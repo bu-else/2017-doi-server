@@ -26,6 +26,8 @@ function handleLatLng(uuid,latLng,callback) {
             console.log(response.json.results == []);
             console.log(response.json.results == "[]");
             console.log(response.json.results == undefined);
+            console.log(response.json.results == {});
+            console.log(typeof response.json.results);
             if (!response.json.results) {
                 console.log("Nothing my guy");
             }
