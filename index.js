@@ -137,8 +137,14 @@ function prepSMS(response,body) {
 }
 
 function callbackCreator(response,isSMS) {
+  var called = false;
   if (isSMS) {
     const callback = (success, text, code) => {
+      if (called) {
+        console.log("Calling callback more than once");
+        return;
+      }
+      called = true;
       response.setHeader('Content-Type', 'text/xml');
       if (success) {
         response.end("<Response></Response>");
@@ -149,6 +155,11 @@ function callbackCreator(response,isSMS) {
     return callback;
   } else {
     const callback = (success, text, code) => {
+      if (called) {
+        console.log("Calling callback more than once");
+        return;
+      }
+      called = true;
       response.statusCode = code;
       response.end(text);
     }
