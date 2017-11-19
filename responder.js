@@ -21,6 +21,8 @@ function handleLatLng(uuid,latLng,callback) {
             language: "EN"
         },
         function (err, response) {
+            console.log("Got back to me");
+            console.log(response);
             if (!err && response) {
                 console.log("CALLED");
                 const address = response.json.results[0]["formatted_address"];
