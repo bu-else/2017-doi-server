@@ -27,7 +27,7 @@ function handleLatLng(uuid,latLng,callback) {
                 twilioClient.messages.create({
                     from: process.env.TWILIO_NUMBER,
                     to: process.env.BEN_NUMBER,
-                    body: "This text is sent to report an opiate overdose at " + address + ". " + "This is emergency " + uuid +
+                    body: "This text is sent to report an opioid overdose at " + address + ". This is emergency " + uuid +
                     ". This is an anonymous, machine generated text. Please do not reply."
                 }).then((messsage) => callback(true,"Success.",200))
                     .catch((messsage) => callback(false,"Internal server error.",500));
@@ -43,7 +43,8 @@ function handleAddress(uuid, address, zipcode, callback) {
     twilioClient.messages.create({
         from: process.env.TWILIO_NUMBER,
         to: process.env.BEN_NUMBER,
-        body: "Emergency " + uuid + " has recieved an updated address: " + address + ". Zipcode: " + zipcode
+        body: "Emergency " + uuid + " has recieved an updated address: " + address + ". Zipcode: " + zipcode +
+        ". This is an anonymous, machine generated text. Please do not reply."
     }).then((messsage) => callback(true,"Success.",200))
         .catch((messsage) => callback(false,"Internal server error.",500));
 }
