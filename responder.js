@@ -23,6 +23,8 @@ function handleLatLng(uuid,latLng,callback) {
         function (err, response) {
             console.log("Got back to me");
             console.log(response.json.results);
+            console.log(response.json.results == []);
+            console.log(response.json.results == "[]");
             if (!err && response.json.results != []) {
                 console.log("CALLED");
                 const address = response.json.results[0]["formatted_address"];
