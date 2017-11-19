@@ -19,12 +19,7 @@ function handleLatLng(uuid,latLng,callback) {
             language: "EN"
         },
         function (err, response) {
-            console.log(err,response)
-            if (!err) {
-                if (response == "" || response == undefined) {
-                    console.log(latLng)
-                    callback(false,"Internal server error.",500);
-                }
+            if (!err && response) {
                 const address = response.json.results[0]["formatted_address"];
                 twilioClient.messages.create({
                     from: process.env.TWILIO_NUMBER,
@@ -35,7 +30,8 @@ function handleLatLng(uuid,latLng,callback) {
                     .catch((messsage) => callback(false,"Internal server error.",500));
 
             } else {
-                 callback(false,"Internal server error.",500);
+                console.log(response);
+                callback(false,"Internal server error.",500);
             }
         }
     )
