@@ -18,10 +18,10 @@ function handleLatLng(uuid,latLng,callback) {
             language: "EN"
         },
         function (err, response) {
-            console.log("Maps Result=", response.json.results[0])
             if (!err) {
-                if (response == "") {
-                     callback(false,"Internal server error.",500);
+                if (response == "" || response == undefined) {
+                    console.log(latLng)
+                    callback(false,"Internal server error.",500);
                 }
                 const address = response.json.results[0]["formatted_address"];
                 twilioClient.messages.create({
