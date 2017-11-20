@@ -17,7 +17,7 @@ function handleLatLng(uuid,latLng,callback) {
     mapsClient.reverseGeocode({
             latlng: latLng,
             result_type: ['country', 'street_address'],
-            location_type: ['ROOFTOP', 'APPROXIMATE'],
+            location_type: ['ROOFTOP', 'APPROXIMATE', "RANGE_INTERPOLATED","APPROXIMATE"],
             language: "EN"
         },
         function (err, response) {
