@@ -84,18 +84,18 @@ function prepAddress(deviceID,zipcode,rawAddress,callback) {
     return;
   }
 
-  responder.handleAddress(emergencyID,address,zipcode,callback);
-
-  if (expirationTime == -1) {
-    return
-  }
-
-  // Like mentioned above, just change expiration time to -1 to never expire emergencies
-  setTimeout(function(){
+  // As mentioned above, just change expiration time to -1 to never expire emergencies
+  if (expirationTime != -1) {
+      setTimeout(function(){
       console.log("Emergency " + emergencyID + "timed out.");
       idGen.endByDevice(deviceID);
     },expirationTime);
   console.log("CALLED");
+  }
+
+
+  responder.handleAddress(emergencyID,address,zipcode,callback);
+
 }
 
 function endEmergency(deviceID,callback) {
