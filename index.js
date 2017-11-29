@@ -13,7 +13,10 @@ const requestHandler = (request, response) => {
     response.end("Wecome to the server of the 2017-doi-app!");
   }
   
+
   callback = callbackCreator(response,false)
+
+  callback(false,"Page not found",404);
 
   var result = request.url.toString().split("/");
   if (result.length != 3) {
