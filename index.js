@@ -62,8 +62,17 @@ function prepLatLng(deviceID,latLng,callback) {
     return;
   }
 
-
   responder.handleLatLng(emergencyID,latLng,callback);
+
+  // As mentioned above, just change expiration time to -1 to never expire emergencies
+  if (expirationTime == -1) {
+    return;
+  }
+  setTimeout(function(){
+    console.log("Emergency " + emergencyID + "timed out.");
+    idGen.endByDevice(deviceID);
+  },expirationTime);
+  console.log("CALLED");
 }
 
 function prepAddress(deviceID,zipcode,rawAddress,callback) {
@@ -84,19 +93,7 @@ function prepAddress(deviceID,zipcode,rawAddress,callback) {
     return;
   }
 
-  // As mentioned above, just change expiration time to -1 to never expire emergencies
-  console.log("PART 1",expirationTime);
-  if (expirationTime != -1) {
-      setTimeout(function(){
-      console.log("Emergency " + emergencyID + "timed out.");
-      idGen.endByDevice(deviceID);
-    },expirationTime);
-    console.log("CALLED");
-  }
-
-
   responder.handleAddress(emergencyID,address,zipcode,callback);
-
 }
 
 function endEmergency(deviceID,callback) {
