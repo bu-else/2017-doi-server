@@ -11,7 +11,7 @@ const stageAddress = 2;
 const requestHandler = (request, response) => {
   if (request.url.toString()=="/") {
     response.end("Wecome to the server of the 2017-doi-app!");
-    setTimeout(console.log('After 10 secs'),10000);
+    setTimeout(function {console.log('After 10 secs')},10000);
   }
   
   callback = callbackCreator(response,false)
