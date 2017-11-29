@@ -8,10 +8,14 @@ const uuidv4 = require('uuid/v4');
 const stageLatLng = 1;
 const stageAddress = 2;
 
+// If expirationTime is set to -1, requests will never expire
+// Otherwise, a good value is ten minutes
+const tenMinutes = 10;// * 60 * 1000
+const expirationTime = tenMinutes
+
 const requestHandler = (request, response) => {
   if (request.url.toString()=="/") {
     response.end("Wecome to the server of the 2017-doi-app!");
-    setTimeout(function(){console.log('After 10 secs')},10000);
   }
   
   callback = callbackCreator(response,false)
@@ -58,6 +62,7 @@ function prepLatLng(deviceID,latLng,callback) {
     return;
   }
 
+
   responder.handleLatLng(emergencyID,latLng,callback);
 }
 
@@ -78,7 +83,18 @@ function prepAddress(deviceID,zipcode,rawAddress,callback) {
     callback(false,"Internal server error.",500);
     return;
   }
+
   responder.handleAddress(emergencyID,address,zipcode,callback);
+
+  if (expirationTime == -1) {
+    return
+  }
+
+  // Like mentioned above, just change expiration time to -1 to never expire emergencies
+  setTimeout(function(){
+      console.log("Emergency " + emergencyID + "timed out.");
+      idGen.endByDevice(deviceID);
+    },expirationTime);
 }
 
 function endEmergency(deviceID,callback) {
