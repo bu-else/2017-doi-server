@@ -17,6 +17,7 @@ const requestHandler = (request, response) => {
   callback = callbackCreator(response,false)
 
   callback(false,"Page not found",404);
+  return;
 
   var result = request.url.toString().split("/");
   if (result.length != 3) {
