@@ -11,9 +11,6 @@ const twilioClient = require('twilio')(
 );
 
 function handleLatLng(uuid,latLng,callback) {
-    console.log("HERE")
-    console.log(uuid);
-    console.log(latLng);
     mapsClient.reverseGeocode({
             latlng: latLng,
             result_type: ['country', 'street_address'],
