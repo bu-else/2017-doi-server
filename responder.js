@@ -27,7 +27,9 @@ function handleLatLng(uuid,latLng,callback) {
             }
             if (!err) {
                 const address = response.json.results[0]["formatted_address"];
-                setAddress(uuid,address)
+                setAddress(uuid,address);
+                console.log("REMOVE THIS");
+                callback(true,"Success",200);
                 // twilioClient.messages.create({
                 //     from: process.env.TWILIO_NUMBER,
                 //     to: process.env.BEN_NUMBER,
@@ -44,7 +46,9 @@ function handleLatLng(uuid,latLng,callback) {
 }
 
 function handleAddress(uuid, address, zipcode, callback) {
-    setAddress(uuid,address)
+    setAddress(uuid,address);
+    console.log("REMOVE THIS");
+    callback(true,"Success",200);
     // twilioClient.messages.create({
     //     from: process.env.TWILIO_NUMBER,
     //     to: process.env.BEN_NUMBER,
