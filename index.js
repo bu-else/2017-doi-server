@@ -10,7 +10,7 @@ const stageAddress = 2;
 
 // If expirationTime is set to -1, requests will never expire
 // Otherwise, a good value is ten minutes
-const tenMinutes = 10 * 60 * 1000
+const tenMinutes = 30 * 1000;//10 * 60 * 1000
 const expirationTime = tenMinutes;
 
 const requestHandler = (request, response) => {
