@@ -106,8 +106,8 @@ function prepLatLng(deviceID,latLng,callback) {
   }
   setTimeout(function(){
     console.log("Emergency " + emergencyID + "timed out.");
-    idGen.endByDevice(deviceID);
-  },expirationTime);
+    endEmergency(deviceID,function(s, t, c){console.log(s, t, c);});
+  }, expirationTime);
 }
 
 function prepAddress(deviceID,zipcode,rawAddress,callback) {
@@ -146,7 +146,7 @@ function fetchAddress(deviceID,response,callback) {
     return;
   }
 
-  json = responder.getAddressJSON(emergencyID);
+  json = responder.getLocationJSON(emergencyID);
   if (json == undefined) {
     callback(false,"Internal server error.",500);
     return;
@@ -164,6 +164,7 @@ function endEmergency(deviceID,callback) {
   try {
     const emergencyID = idGen.getByDevice(deviceID);
     idGen.endByDevice(deviceID);
+    responder.expireLocation(deviceID);
   } catch (e) {
     console.log(e);
     callback(false,"Internal server error.",500);

@@ -10,7 +10,7 @@ const twilioClient = require('twilio')(
     process.env.TWILIO_TOKEN
 );
 
-var deviceToLocation = {};
+var deviceToAddress = {};
 var deviceToLatLng = {};
 
 function handleLatLng(uuid,latLng,callback) {
@@ -28,7 +28,7 @@ function handleLatLng(uuid,latLng,callback) {
             }
             if (!err) {
                 const address = response.json.results[0]["formatted_address"];
-                deviceToLocation[uuid] = address;
+                deviceToAddress[uuid] = address;
                 deviceToLatLng[uuid] = latLng;
                 console.log("REMOVE THIS");
                 callback(true,"Success",200);
@@ -50,11 +50,11 @@ function handleLatLng(uuid,latLng,callback) {
 function handleAddress(uuid, address, zipcode, callback) {
     // Because we are just receiving a street address and a zipcode, without a city, state or country
     // we insert it carefully
-    oldAddress = deviceToLocation[uuid];
+    oldAddress = deviceToAddress[uuid];
     formatted = oldAddress.split(",");
     formatted[0] = address;
     formatted[2] = formatted[2].slice(0,4) + zipcode;
-    deviceToLocation[uuid] = formatted.join()
+    deviceToAddress[uuid] = formatted.join()
     console.log("REMOVE THIS");
     callback(true,"Success",200);
     // twilioClient.messages.create({
@@ -66,8 +66,8 @@ function handleAddress(uuid, address, zipcode, callback) {
     //     .catch((messsage) => callback(false,"Internal server error.",500));
 }
 
-function getAddressJSON(uuid) {
-    const address = deviceToLocation[uuid];
+function getLocationJSON(uuid) {
+    const address = deviceToAddress[uuid];
     const latLng = deviceToLatLng[uuid];
     if (address == undefined || latLng == undefined) {
         return undefined
@@ -75,13 +75,14 @@ function getAddressJSON(uuid) {
     return JSON.stringify({"address":address,"latLng":latLng})
 }
 
-function expireAddress(uuid) {
-    delete deviceToLocation[uuid];
+function expireLocation(uuid) {
+    delete deviceToAddress[uuid];
+    delete deviceToLatLng[uuid];
 }
 
 module.exports = {
     handleLatLng,
     handleAddress,
-    getAddressJSON,
-    expireAddress
+    getLocationJSON,
+    expireLocation
 };
