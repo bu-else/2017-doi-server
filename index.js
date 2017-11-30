@@ -34,10 +34,11 @@ const requestHandler = (request, response) => {
     case "address":
       prepAddress(URL_GET["UUID"], URL_GET["Zipcode"], URL_GET["Address"],callback);
       break;
-    case "fetch":
-      fetchAddress(URL_GET["UUID"],callback);
     case "end":
       endEmergency(URL_GET["UUID"],callback);
+      break;
+    case "fetch":
+      fetchAddress(URL_GET["UUID"],response,callback);
       break;
     case "sms":
       prepSMS(response,URL_GET["Body"]);
@@ -66,12 +67,6 @@ function prepSMS(response,body) {
         return;
       }
       prepAddress(result[1],result[2],result[3],callback)
-      break;
-    case "fetch":
-      if (result.length != 2) {
-        callback(false,"Invalid request.",400);
-      }
-      fetchAddress(result[1],callback)
       break;
     case "end":
       if (result.length != 2) {
@@ -136,7 +131,7 @@ function prepAddress(deviceID,zipcode,rawAddress,callback) {
   responder.handleAddress(emergencyID,address,zipcode,callback);
 }
 
-function fetchAddress(deviceID,callback) {
+function fetchAddress(deviceID,response,callback) {
    if (deviceID == undefined) {
     callback(false,"Invalid request.",400);
     return;
@@ -151,12 +146,13 @@ function fetchAddress(deviceID,callback) {
     return;
   }
 
-  address = responder.getAddress(emergencyID);
-  if (address == undefined) {
+  json = responder.getAddress(emergencyID);
+  if (json == undefined) {
     callback(false,"Internal server error.",500);
-  } else {
-    callback(true,address,200);
+    return;
   }
+  response.setHeader('Content-Type', 'application/json');  
+  response.end(json);
 }
 
 function endEmergency(deviceID,callback) {

@@ -10,7 +10,8 @@ const twilioClient = require('twilio')(
     process.env.TWILIO_TOKEN
 );
 
-var deviceToLocation = {}
+var deviceToLocation = {};
+var deviceToLatLng = {};
 
 function handleLatLng(uuid,latLng,callback) {
     mapsClient.reverseGeocode({
@@ -28,6 +29,7 @@ function handleLatLng(uuid,latLng,callback) {
             if (!err) {
                 const address = response.json.results[0]["formatted_address"];
                 deviceToLocation[uuid] = address;
+                deviceToLatLng[uuid] = latLng;
                 console.log("REMOVE THIS");
                 callback(true,"Success",200);
                 // twilioClient.messages.create({
@@ -64,8 +66,13 @@ function handleAddress(uuid, address, zipcode, callback) {
     //     .catch((messsage) => callback(false,"Internal server error.",500));
 }
 
-function getAddress(uuid) {
-    return deviceToLocation[uuid];
+function getAddressJSON(uuid) {
+    const address = deviceToLocation[uuid];
+    const latLng = deviceToLatLng[uuid];
+    if (address == undefined || latLng == undefined) {
+        return undefined
+    }
+    return JSON.stringify({"address":address,"latLng":latLng})
 }
 
 function expireAddress(uuid) {
