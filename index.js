@@ -146,7 +146,7 @@ function fetchAddress(deviceID,response,callback) {
     return;
   }
 
-  json = responder.getAddress(emergencyID);
+  json = responder.getAddressJSON(emergencyID);
   if (json == undefined) {
     callback(false,"Internal server error.",500);
     return;
