@@ -75,7 +75,6 @@ function expireAddress(uuid) {
 module.exports = {
     handleLatLng,
     handleAddress,
-    setAddress,
     getAddress,
     expireAddress
 };
