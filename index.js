@@ -32,8 +32,10 @@ const requestHandler = (request, response) => {
       prepLatLng(URL_GET["UUID"], URL_GET["LatLng"],callback);
       break;
     case "address":
-      prepAddress(URL_GET["UUID"], URL_GET["Zipcode"], URL_GET["Address"],callback)
+      prepAddress(URL_GET["UUID"], URL_GET["Zipcode"], URL_GET["Address"],callback);
       break;
+    case "fetch":
+      fetchAddress(URL_GET["UUID"],callback);
     case "end":
       endEmergency(URL_GET["UUID"],callback);
       break;
@@ -44,6 +46,45 @@ const requestHandler = (request, response) => {
       callback(false,"Page not found.",404);
       break;
   } 
+}
+function prepSMS(response,body) {
+  result = body.split("\n");
+  
+  callback = callbackCreator(response,true);
+
+  switch (result[0]) {
+    case "latlng":
+      if (result.length != 3) {
+        callback(false,"Invalid request.",400);
+        return;
+      }
+      prepLatLng(result[1],result[2],callback);
+      break;
+    case "address":
+      if (result.length != 4) {
+        callback(false,"Invalid request.",400);
+        return;
+      }
+      prepAddress(result[1],result[2],result[3],callback)
+      break;
+    case "fetch":
+      if (result.length != 2) {
+        callback(false,"Invalid request.",400);
+      }
+      fetchAddress(result[1],callback)
+      break;
+    case "end":
+      if (result.length != 2) {
+        callback(false,"Invalid request.",400);
+        return;
+      }
+      endEmergency(result[1],callback);
+      break;
+    default:
+      callback(false,"Request not found.",404);
+      break;
+
+  }
 }
 
 function prepLatLng(deviceID,latLng,callback) {
@@ -95,6 +136,29 @@ function prepAddress(deviceID,zipcode,rawAddress,callback) {
   responder.handleAddress(emergencyID,address,zipcode,callback);
 }
 
+function fetchAddress(deviceID,callback) {
+   if (deviceID == undefined) {
+    callback(false,"Invalid request.",400);
+    return;
+  }
+
+  var emergencyID;
+  try {
+    emergencyID = idGen.getByDevice(deviceID);
+  } catch (e) {
+    console.log(e);
+    callback(false,"Internal server error.",500);
+    return;
+  }
+
+  address = responder.getAddress(uuid)
+  if (address == undefined) {
+    callback(false,"Internal server error.",500);
+  } else {
+    callback(true,address,200);
+  }
+}
+
 function endEmergency(deviceID,callback) {
    if (deviceID == undefined) {
     callback(false,"Invalid request.",400);
@@ -113,39 +177,6 @@ function endEmergency(deviceID,callback) {
   callback(true,"Success.",200);
 }
 
-function prepSMS(response,body) {
-  result = body.split("\n");
-  
-  callback = callbackCreator(response,true);
-
-  switch (result[0]) {
-    case "latlng":
-      if (result.length != 3) {
-        callback(false,"Invalid request.",400);
-        return;
-      }
-      prepLatLng(result[1],result[2],callback);
-      break;
-    case "address":
-      if (result.length != 4) {
-        callback(false,"Invalid request.",400);
-        return;
-      }
-      prepAddress(result[1],result[2],result[3],callback)
-      break;
-    case "end":
-      if (result.length != 2) {
-        callback(false,"Invalid request.",400);
-        return;
-      }
-      endEmergency(result[1],callback);
-    default:
-      callback(false,"Request not found.",404);
-      break;
-
-  }
-}
-
 function callbackCreator(response,isSMS) {
   var called = false;
   if (isSMS) {
@@ -155,6 +186,7 @@ function callbackCreator(response,isSMS) {
         return;
       }
       called = true;
+
       response.setHeader('Content-Type', 'text/xml');
       if (success) {
         response.end("<Response></Response>");
@@ -170,6 +202,7 @@ function callbackCreator(response,isSMS) {
         return;
       }
       called = true;
+
       response.statusCode = code;
       response.end(text);
     }

@@ -10,6 +10,8 @@ const twilioClient = require('twilio')(
     process.env.TWILIO_TOKEN
 );
 
+var deviceToLocation = {}
+
 function handleLatLng(uuid,latLng,callback) {
     mapsClient.reverseGeocode({
             latlng: latLng,
@@ -18,13 +20,14 @@ function handleLatLng(uuid,latLng,callback) {
             language: "EN"
         },
         function (err, response) {
-            if (Object.keys(response.json.results).length === 0) {
+            if (Object.keys(response.json.results).length == 0) {
                 console.log("Empty Google Maps response.");
                 callback(false,"Internal server error.",500);
                 return;
             }
             if (!err) {
                 const address = response.json.results[0]["formatted_address"];
+                setAddress(uuid,address)
                 twilioClient.messages.create({
                     from: process.env.TWILIO_NUMBER,
                     to: process.env.BEN_NUMBER,
@@ -41,6 +44,7 @@ function handleLatLng(uuid,latLng,callback) {
 }
 
 function handleAddress(uuid, address, zipcode, callback) {
+    setAddress(uuid,address)
     twilioClient.messages.create({
         from: process.env.TWILIO_NUMBER,
         to: process.env.BEN_NUMBER,
@@ -50,7 +54,22 @@ function handleAddress(uuid, address, zipcode, callback) {
         .catch((messsage) => callback(false,"Internal server error.",500));
 }
 
+function setAddress(uuid,address) {
+    deviceToLocation[uuid] = address;
+}
+
+function getAddress(uuid) {
+    return deviceToLocation[uuid];
+}
+
+function expireAddress(uuid) {
+    delete deviceToLocation[uuid];
+}
+
 module.exports = {
     handleLatLng,
-    handleAddress
+    handleAddress,
+    setAddress,
+    getAddress,
+    expireAddress
 };
