@@ -107,7 +107,7 @@ function prepLatLng(deviceID,latLng,callback) {
   setTimeout(function(){
     endEmergency(deviceID,function(s, t, c){
       console.log("Emergency " + emergencyID + " timed out.");
-      console.log("Result of timeout was: " s, t, c);
+      console.log("Result of timeout was: ", s, t, c);
     });
   }, expirationTime);
 }
