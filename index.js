@@ -151,7 +151,7 @@ function fetchAddress(deviceID,callback) {
     return;
   }
 
-  address = responder.getAddress(uuid)
+  address = responder.getAddress(emergencyID);
   if (address == undefined) {
     callback(false,"Internal server error.",500);
   } else {
