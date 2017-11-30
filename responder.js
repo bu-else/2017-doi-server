@@ -27,7 +27,7 @@ function handleLatLng(uuid,latLng,callback) {
             }
             if (!err) {
                 const address = response.json.results[0]["formatted_address"];
-                setAddress(uuid,address);
+                deviceToLocation[uuid] = address;
                 console.log("REMOVE THIS");
                 callback(true,"Success",200);
                 // twilioClient.messages.create({
@@ -46,7 +46,13 @@ function handleLatLng(uuid,latLng,callback) {
 }
 
 function handleAddress(uuid, address, zipcode, callback) {
-    setAddress(uuid,address);
+    // Because we are just receiving a street address and a zipcode, without a city, state or country
+    // we insert it carefully
+    oldAddress = deviceToLocation[uuid];
+    formatted = oldAddress.split(",");
+    formatted[0] = address;
+    formatted[2] = formatted[2].slice(0,4) + zipcode;
+    deviceToLocation[uuid] = formatted.join()
     console.log("REMOVE THIS");
     callback(true,"Success",200);
     // twilioClient.messages.create({
@@ -56,10 +62,6 @@ function handleAddress(uuid, address, zipcode, callback) {
     //     ". This is an anonymous, machine generated text. Please do not reply."
     // }).then((messsage) => callback(true,"Success.",200))
     //     .catch((messsage) => callback(false,"Internal server error.",500));
-}
-
-function setAddress(uuid,address) {
-    deviceToLocation[uuid] = address;
 }
 
 function getAddress(uuid) {
