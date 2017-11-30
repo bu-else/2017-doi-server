@@ -82,6 +82,6 @@ function expireAddress(uuid) {
 module.exports = {
     handleLatLng,
     handleAddress,
-    getAddress,
+    getAddressJSON,
     expireAddress
 };
