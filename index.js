@@ -11,7 +11,7 @@ const stageAddress = 2;
 // If expirationTime is set to -1, requests will never expire
 // Otherwise, a good value is ten minutes
 const tenMinutes = 10 * 60 * 1000;
-const expirationTime = tenMinutes;
+const expirationTime = -1;
 
 const requestHandler = (request, response) => {
   if (request.url.toString()=="/") {
@@ -102,6 +102,7 @@ function prepLatLng(deviceID,latLng,callback) {
 
   // As mentioned above, just change expiration time to -1 to never expire emergencies
   if (expirationTime == -1) {
+    console.log("Not expiring addresses");
     return;
   }
   setTimeout(function(){
@@ -144,7 +145,7 @@ function fetchAddress(deviceID,response,callback) {
     emergencyID = idGen.getByDevice(deviceID);
   } catch (e) {
     console.log(e);
-    callback(false,"Internal server error.",500);
+    callback(false,"Could not find emergency.",404);
     return;
   }
 
