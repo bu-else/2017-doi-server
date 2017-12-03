@@ -62,7 +62,7 @@ function setStageByEmergency(emergencyID,stage) {
   }
   currentStage = emergencyToStage[emergencyID];
   if (currentStage >= stage) {
-    throw "Device ID: " + deviceID + "\'s stage is being set out of order. Current stage: " +
+    throw "Emergency: " + emergencyID + "\'s stage is being set out of order. Current stage: " +
      currentStage + ". New Stage: " + stage + ".";
   }
   emergencyToStage[emergencyID] = stage;
