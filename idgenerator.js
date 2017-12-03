@@ -18,7 +18,7 @@ function makeByDevice(deviceID) {
     for (var i = 0; i < emergencyIDLength; i++){
       genID += possible.charAt(Math.floor(Math.random() * possible.length));
     }
-  } while (usedEmergencyID[genID]!=undefined && called < maxAttempts);
+  } while (usedEmergencyID[genID] && called < maxAttempts);
   
   if (called == maxAttempts) {
     throw "No unused IDs available.";
@@ -31,14 +31,14 @@ function makeByDevice(deviceID) {
 
 function getByDevice(deviceID) {
   emergency = deviceToEmergency[deviceID];
-  if (emergency == undefined) {
+  if (!emergency) {
     throw "Getting undefined ID.";
   }
   return emergency;
 }
 
 function setStageByDevice(deviceID,stage) {
-  if (deviceToStage[deviceID] == undefined) {
+  if (!deviceToStage[deviceID]) {
     deviceToStage[deviceID] = stage;
     return
   }

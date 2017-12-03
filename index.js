@@ -37,11 +37,11 @@ const requestHandler = (request, response) => {
       break;
 
     case "end":
-      endEmergency(URL_GET["deviceID"], callback);
+      endEmergency(URL_GET["deviceID"], URL_GET["emergencyID"], callback);
       break;
 
     case "fetch":
-      fetchAddress(URL_GET["deviceID"], response, callback);
+      fetchAddress(URL_GET["deviceID"], URL_GET["emergencyID"], response, callback);
       break;
 
     case "sms":
@@ -81,7 +81,7 @@ function prepSMS(response, body) {
         callback(false, "Invalid request.", 400);
         return;
       }
-      endEmergency(result[1], callback);
+      endEmergency(result[1], undefined, callback);
       break;
 
     default:
@@ -92,7 +92,7 @@ function prepSMS(response, body) {
 }
 
 function prepLatLng(deviceID, latLng, callback) {
-  if (deviceID == undefined || latLng == undefined) {
+  if (!deviceID || !latLng) {
     callback(false, "Invalid request.", 400);
     return;
   }
@@ -123,7 +123,7 @@ function prepLatLng(deviceID, latLng, callback) {
 }
 
 function prepAddress(deviceID, zipcode, rawAddress, callback) {
-  if (deviceID == undefined || rawAddress == undefined || zipcode == undefined) {
+  if (!deviceID || !rawAddress || !zipcode) {
     callback(false, "Invalid request.", 400);
     return;
   }
@@ -131,7 +131,7 @@ function prepAddress(deviceID, zipcode, rawAddress, callback) {
 
 
   var emergencyID = tryGetEmergencyID(deviceID, callback);
-  if (emergencyID == undefined) {
+  if (!emergencyID) {
     return;
   }
 
@@ -146,19 +146,23 @@ function prepAddress(deviceID, zipcode, rawAddress, callback) {
   responder.handleAddress(emergencyID, address, zipcode, callback);
 }
 
-function fetchAddress(deviceID, response, callback) {
-  if (deviceID == undefined) {
+function fetchAddress(deviceID, emergencyID, response, callback) {
+  if (!deviceID && !emergencyID) {
     callback(false, "Invalid request.", 400);
     return;
   }
 
-  var emergencyID = tryGetEmergencyID(deviceID, callback);
-  if (emergencyID == undefined) {
-    return;
+  if (!emergencyID) {
+    emergencyID = tryGetEmergencyID(deviceID, callback);
+    if (!emergencyID) {
+      // We were unable to get the emergencyID from our storage and it was not passed in
+      // So we must stop
+      return;
+    }
   }
 
   json = responder.getLocationJSON(emergencyID);
-  if (json == undefined) {
+  if (!json) {
     callback(false, "Internal server error.", 500);
     return;
   }
@@ -166,17 +170,21 @@ function fetchAddress(deviceID, response, callback) {
   response.end(json);
 }
 
-function endEmergency(deviceID, callback) {
-  if (deviceID == undefined) {
+function endEmergency(deviceID, emergencyID, callback) {
+  if (!deviceID && !emergencyID) {
     callback(false, "Invalid request.", 400);
     return;
   }
 
-  var emergencyID = tryGetEmergencyID(deviceID, callback);
-  if (emergencyID == undefined) {
-    return;
+  if (!emergencyID) {
+    emergencyID = tryGetEmergencyID(deviceID, callback);
+    if (!emergencyID) {
+      // We were unable to get the emergencyID from our storage and it was not passed in
+      // So we must stop
+      return;
+    }
   }
-  
+
   try {
     idGen.endByDevice(deviceID);
     responder.expireLocation(deviceID);
