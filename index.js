@@ -100,7 +100,7 @@ function prepLatLng(deviceID, latLng, callback) {
   var emergencyID;
   try {
     emergencyID = idGen.makeByDevice(deviceID);
-    idGen.setStageByDevice(deviceID, stageLatLng);
+    idGen.setStageByEmergency(emergencyID, stageLatLng);
   } catch (e) {
     console.log(e);
     callback(false, "Internal server error.", 500);
@@ -115,7 +115,7 @@ function prepLatLng(deviceID, latLng, callback) {
     return;
   }
   setTimeout(function() {
-    endEmergency(deviceID, function(s, t, c) {
+    endByEmergency(emergencyID, function(s, t, c) {
       console.log("Emergency " + emergencyID + " timed out.");
       console.log("Result of timeout was: ", s, t, c);
     });
@@ -136,7 +136,7 @@ function prepAddress(deviceID, zipcode, rawAddress, callback) {
   }
 
   try {
-    idGen.setStageByDevice(deviceID, stageAddress);
+    idGen.setStageByEmergency(emergencyID, stageAddress);
   } catch (e) {
     console.log(e);
     callback(false, "Internal server error.", 500);

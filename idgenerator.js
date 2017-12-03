@@ -3,65 +3,78 @@ const maxAttempts = 10000;
 // Extremely small likelihood of timing due to infinite loop out unless we are genuinely full.
 // We have 36^4 = 1.6 million possible IDs.
 const testID = "TEST";
+const testDevice = "computer-id";
+
+// No one should ever generate the testID except for testing purposes.
+var usedEmergencyID = {testID:true};
 
 var deviceToEmergency = {};
-var usedEmergencyID = {testID:true};
-// No one should ever generate the testID except for testing purposes.
-var deviceToStage = {};
+var emergencyToDevice = {};
+var emergencyToStage = {};
 
 function makeByDevice(deviceID) {
   const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
-  if (deviceID == "computer-id") {
+  if (deviceID == testDevice) {
     console.log("Generating the test ID");
-    deviceToEmergency[deviceID] = testID;
+    emergencyID = testID;
+    deviceToEmergency[deviceID] = emergencyID;
+    emergencyToDevice[emergencyID] = deviceID;
     return testID;
   }
+  
+  if (deviceToEmergency[deviceID]) {
+    throw "Device already has an emergency";
+  }
 
-  var genID;
+  var emergencyID;
   var called = 0;
   do {
     called += 1;
-    genID = "";
+    emergencyID = "";
     for (var i = 0; i < emergencyIDLength; i++){
-      genID += possible.charAt(Math.floor(Math.random() * possible.length));
+      emergencyID += possible.charAt(Math.floor(Math.random() * possible.length));
     }
-  } while (usedEmergencyID[genID] && called < maxAttempts);
+  } while (usedEmergencyID[emergencyID] && called < maxAttempts);
   
   if (called == maxAttempts) {
     throw "No unused IDs available.";
   }
   
-  usedEmergencyID[genID] = true;
-  deviceToEmergency[deviceID] = genID;
-  return genID;
+  usedEmergencyID[emergencyID] = true;
+  deviceToEmergency[deviceID] = emergencyID;
+  emergencyToDevice[emergencyID] = deviceID;
+  return emergencyID;
 }
 
-function getByDevice(deviceID) {
-  emergency = deviceToEmergency[deviceID];
-  if (!emergency) {
+function getEmergencyByDevice(deviceID) {
+  emergencyID = deviceToEmergency[deviceID];
+  if (!emergencyID) {
     throw "Getting undefined ID.";
   }
-  return emergency;
+  return emergencyID;
 }
 
-function setStageByDevice(deviceID,stage) {
-  if (!deviceToStage[deviceID]) {
-    deviceToStage[deviceID] = stage;
+function setStageByEmergency(emergencyID,stage) {
+  if (!emergencyToStage[emergencyID]) {
+    emergencyToStage[emergencyID] = stage;
     return
   }
-  currentStage = deviceToStage[deviceID];
+  currentStage = emergencyToStage[emergencyID];
   if (currentStage >= stage) {
     throw "Device ID: " + deviceID + "\'s stage is being set out of order. Current stage: " +
      currentStage + ". New Stage: " + stage + ".";
   }
-  deviceToStage[deviceID] = stage;
+  emergencyToStage[emergencyID] = stage;
 }
 
-function endByDevice(deviceID) {
+
+function endByEmergency(emergencyID) {
   // We don't free up usedEmergencyID because it has already been used
+  deviceID = emergencyToDevice[emergencyID];
+  delete emergencyToDevice[emergencyID];
   delete deviceToEmergency[deviceID];
-  delete deviceToStage[deviceID];
+  delete emergencyToStage[emergencyID];
 }
 
 module.exports = {
