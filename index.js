@@ -186,8 +186,8 @@ function endEmergency(deviceID, emergencyID, callback) {
   }
 
   try {
-    idGen.endByDevice(deviceID);
-    responder.expireLocation(deviceID);
+    idGen.endByEmergency(emergencyID);
+    responder.expireLocation(emergencyID);
   } catch (e) {
     console.log(e);
     callback(false, "Internal server error.", 500);
