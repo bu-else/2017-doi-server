@@ -235,7 +235,11 @@ function callbackCreator(response, isSMS) {
       called = true;
 
       response.statusCode = code;
-      response.end(text);
+      if (success) {
+        response.end(text);
+      } else {
+        response.statusMessage = text;
+      }     
     }
     return callback;
   }
