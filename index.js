@@ -29,16 +29,16 @@ const requestHandler = (request, response) => {
 
   switch (result[1]) {
     case "latlng":
-      prepLatLng(URL_GET["UUID"], URL_GET["LatLng"],callback);
+      prepLatLng(URL_GET["deviceID"], URL_GET["LatLng"],callback);
       break;
     case "address":
-      prepAddress(URL_GET["UUID"], URL_GET["Zipcode"], URL_GET["Address"],callback);
+      prepAddress(URL_GET["deviceID"], URL_GET["Zipcode"], URL_GET["Address"],callback);
       break;
     case "end":
-      endEmergency(URL_GET["UUID"],callback);
+      endEmergency(URL_GET["deviceID"],callback);
       break;
     case "fetch":
-      fetchAddress(URL_GET["UUID"],response,callback);
+      fetchAddress(URL_GET["deviceID"],response,callback);
       break;
     case "sms":
       prepSMS(response,URL_GET["Body"]);
