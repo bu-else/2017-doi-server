@@ -200,7 +200,7 @@ function endEmergency(deviceID, emergencyID, callback) {
 function tryGetEmergencyID(deviceID, callback) {
   var emergencyID;
   try {
-    emergencyID = idGen.getByDevice(deviceID);
+    emergencyID = idGen.getEmergencyByDevice(deviceID);
   } catch (e) {
     console.log(e);
     callback(false, "Could not find emergency.", 404);
