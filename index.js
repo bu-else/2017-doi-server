@@ -14,170 +14,193 @@ const tenMinutes = 10 * 60 * 1000;
 const expirationTime = -1;
 
 const requestHandler = (request, response) => {
-  if (request.url.toString()=="/") {
+  if (request.url.toString() == "/") {
     response.end("Wecome to the server of the 2017-doi-app!");
   }
-  
-  callback = callbackCreator(response,false)
+
+  callback = callbackCreator(response, false)
 
   var result = request.url.toString().split("/");
   if (result.length != 3) {
-    callback(false,"Page not found.",404);
+    callback(false, "Page not found.", 404);
     return;
   }
   URL_GET = buildURL_GET(request.url.toString())
 
   switch (result[1]) {
     case "latlng":
-      prepLatLng(URL_GET["deviceID"], URL_GET["LatLng"],callback);
+      prepLatLng(URL_GET["deviceID"], URL_GET["LatLng"], callback);
       break;
+
     case "address":
-      prepAddress(URL_GET["deviceID"], URL_GET["Zipcode"], URL_GET["Address"],callback);
+      prepAddress(URL_GET["deviceID"], URL_GET["Zipcode"], URL_GET["Address"], callback);
       break;
+
     case "end":
-      endEmergency(URL_GET["deviceID"],callback);
+      endEmergency(URL_GET["deviceID"], callback);
       break;
+
     case "fetch":
-      fetchAddress(URL_GET["deviceID"],response,callback);
+      fetchAddress(URL_GET["deviceID"], response, callback);
       break;
+
     case "sms":
-      prepSMS(response,URL_GET["Body"]);
+      prepSMS(response, URL_GET["Body"]);
       break;
+
     default:
-      callback(false,"Page not found.",404);
+      callback(false, "Page not found.", 404);
       break;
-  } 
+  }
 }
-function prepSMS(response,body) {
+
+function prepSMS(response, body) {
   result = body.split("\n");
-  
-  callback = callbackCreator(response,true);
+
+  callback = callbackCreator(response, true);
 
   switch (result[0]) {
     case "latlng":
       if (result.length != 3) {
-        callback(false,"Invalid request.",400);
+        callback(false, "Invalid request.", 400);
         return;
       }
-      prepLatLng(result[1],result[2],callback);
+      prepLatLng(result[1], result[2], callback);
       break;
+
     case "address":
       if (result.length != 4) {
-        callback(false,"Invalid request.",400);
+        callback(false, "Invalid request.", 400);
         return;
       }
-      prepAddress(result[1],result[2],result[3],callback)
+      prepAddress(result[1], result[2], result[3], callback)
       break;
+
     case "end":
       if (result.length != 2) {
-        callback(false,"Invalid request.",400);
+        callback(false, "Invalid request.", 400);
         return;
       }
-      endEmergency(result[1],callback);
+      endEmergency(result[1], callback);
       break;
+
     default:
-      callback(false,"Request not found.",404);
+      callback(false, "Request not found.", 404);
       break;
 
   }
 }
 
-function prepLatLng(deviceID,latLng,callback) {
+function prepLatLng(deviceID, latLng, callback) {
   if (deviceID == undefined || latLng == undefined) {
-    callback(false,"Invalid request.",400);
+    callback(false, "Invalid request.", 400);
     return;
   }
 
   var emergencyID;
-  try  {
+  try {
     emergencyID = idGen.makeByDevice(deviceID);
-    idGen.setStageByDevice(deviceID,stageLatLng);
-  }
-  catch (e) {
-    callback(false,"Internal server error.",500);
+    idGen.setStageByDevice(deviceID, stageLatLng);
+  } catch (e) {
+    console.log(e);
+    callback(false, "Internal server error.", 500);
     return;
   }
 
-  responder.handleLatLng(emergencyID,latLng,callback);
+  responder.handleLatLng(emergencyID, latLng, callback);
 
   // As mentioned above, just change expiration time to -1 to never expire emergencies
   if (expirationTime == -1) {
     console.log("Not expiring addresses");
     return;
   }
-  setTimeout(function(){
-    endEmergency(deviceID,function(s, t, c){
+  setTimeout(function() {
+    endEmergency(deviceID, function(s, t, c) {
       console.log("Emergency " + emergencyID + " timed out.");
       console.log("Result of timeout was: ", s, t, c);
     });
   }, expirationTime);
 }
 
-function prepAddress(deviceID,zipcode,rawAddress,callback) {
+function prepAddress(deviceID, zipcode, rawAddress, callback) {
   if (deviceID == undefined || rawAddress == undefined || zipcode == undefined) {
-    callback(false,"Invalid request.",400);
+    callback(false, "Invalid request.", 400);
     return;
   }
-  const address = rawAddress.replace(/\+/g," ");
+  const address = rawAddress.replace(/\+/g, " ");
 
-  var emergencyID;
+
+  var emergencyID = tryGetEmergencyID(deviceID, callback);
+  if (emergencyID == undefined) {
+    return;
+  }
+
   try {
-    emergencyID = idGen.getByDevice(deviceID);
-    idGen.setStageByDevice(deviceID,stageAddress);
-  }
-  catch (e) {
-    console.log(e);
-    callback(false,"Internal server error.",500);
-    return;
-  }
-
-  responder.handleAddress(emergencyID,address,zipcode,callback);
-}
-
-function fetchAddress(deviceID,response,callback) {
-   if (deviceID == undefined) {
-    callback(false,"Invalid request.",400);
-    return;
-  }
-
-  var emergencyID;
-  try {
-    emergencyID = idGen.getByDevice(deviceID);
+    idGen.setStageByDevice(deviceID, stageAddress);
   } catch (e) {
     console.log(e);
-    callback(false,"Could not find emergency.",404);
+    callback(false, "Internal server error.", 500);
+    return;
+  }
+
+  responder.handleAddress(emergencyID, address, zipcode, callback);
+}
+
+function fetchAddress(deviceID, response, callback) {
+  if (deviceID == undefined) {
+    callback(false, "Invalid request.", 400);
+    return;
+  }
+
+  var emergencyID = tryGetEmergencyID(deviceID, callback);
+  if (emergencyID == undefined) {
     return;
   }
 
   json = responder.getLocationJSON(emergencyID);
   if (json == undefined) {
-    callback(false,"Internal server error.",500);
+    callback(false, "Internal server error.", 500);
     return;
   }
-  response.setHeader('Content-Type', 'application/json');  
+  response.setHeader('Content-Type', 'application/json');
   response.end(json);
 }
 
-function endEmergency(deviceID,callback) {
-   if (deviceID == undefined) {
-    callback(false,"Invalid request.",400);
+function endEmergency(deviceID, callback) {
+  if (deviceID == undefined) {
+    callback(false, "Invalid request.", 400);
     return;
   }
 
+  var emergencyID = tryGetEmergencyID(deviceID, callback);
+  if (emergencyID == undefined) {
+    return;
+  }
+  
   try {
-    const emergencyID = idGen.getByDevice(deviceID);
     idGen.endByDevice(deviceID);
     responder.expireLocation(deviceID);
   } catch (e) {
     console.log(e);
-    callback(false,"Internal server error.",500);
+    callback(false, "Internal server error.", 500);
     return;
   }
 
-  callback(true,"Success.",200);
+  callback(true, "Success.", 200);
 }
 
-function callbackCreator(response,isSMS) {
+function tryGetEmergencyID(deviceID, callback) {
+  var emergencyID;
+  try {
+    emergencyID = idGen.getByDevice(deviceID);
+  } catch (e) {
+    console.log(e);
+    callback(false, "Could not find emergency.", 404);
+  }
+  return emergencyID;
+}
+
+function callbackCreator(response, isSMS) {
   var called = false;
   if (isSMS) {
     const callback = (success, text, code) => {
@@ -210,21 +233,21 @@ function callbackCreator(response,isSMS) {
   }
 }
 
-function buildURL_GET(urlString){
+function buildURL_GET(urlString) {
   var URL_GET = {};
-  if(urlString.indexOf('?') == -1) {
+  if (urlString.indexOf('?') == -1) {
     return URL_GET;
   }
   var query = urlString
-                 .toString()
-                 // get the query string
-                 .replace(/^.*?\?/, '')
-                 // and remove any existing hash string (thanks, @vrijdenker)
-                 .replace(/#.*$/, '')
-                 .split('&');
-  for(var i=0, l=query.length; i<l; i++) {
-     var aux = decodeURIComponent(query[i]).split('=');
-     URL_GET[aux[0]] = aux[1];
+    .toString()
+    // get the query string
+    .replace(/^.*?\?/, '')
+    // and remove any existing hash string (thanks, @vrijdenker)
+    .replace(/#.*$/, '')
+    .split('&');
+  for (var i = 0, l = query.length; i < l; i++) {
+    var aux = decodeURIComponent(query[i]).split('=');
+    URL_GET[aux[0]] = aux[1];
   }
   return URL_GET;
 }
@@ -236,5 +259,3 @@ server.listen(port, (err) => {
   }
   console.log(`server is listening on ${port}`);
 })
-
-
