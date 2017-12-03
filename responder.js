@@ -30,15 +30,13 @@ function handleLatLng(emergencyID,latLng,callback) {
                 const address = response.json.results[0]["formatted_address"];
                 emergencyToAddress[emergencyID] = address;
                 emergencyToLatLng[emergencyID] = latLng;
-                console.log("REMOVE THIS");
-                callback(true,"Success",200);
-                // twilioClient.messages.create({
-                //     from: process.env.TWILIO_NUMBER,
-                //     to: process.env.BEN_NUMBER,
-                //     body: "This text is sent to report an opioid overdose at " + address + ". This is emergency " + emergencyID +
-                //     ". This is an anonymous, machine generated text. Please do not reply."
-                // }).then((messsage) => callback(true,"Success.",200))
-                //     .catch((messsage) => callback(false,"Internal server error.",500));
+                twilioClient.messages.create({
+                    from: process.env.TWILIO_NUMBER,
+                    to: process.env.BEN_NUMBER,
+                    body: "This text is sent to report an opioid overdose at " + address + ". This is emergency " + emergencyID +
+                    ". This is an anonymous, machine generated text. Please do not reply."
+                }).then((messsage) => callback(true,"Success.",200))
+                    .catch((messsage) => callback(false,"Internal server error.",500));
             } else {
                 console.log(err)
                 callback(false,"Internal server error.",500);
@@ -55,15 +53,13 @@ function handleAddress(emergencyID, address, zipcode, callback) {
     formatted[0] = address;
     formatted[2] = formatted[2].slice(0,4) + zipcode;
     emergencyToAddress[emergencyID] = formatted.join()
-    console.log("REMOVE THIS");
-    callback(true,"Success",200);
-    // twilioClient.messages.create({
-    //     from: process.env.TWILIO_NUMBER,
-    //     to: process.env.BEN_NUMBER,
-    //     body: "Emergency " + emergencyID + " has recieved an updated address: " + address + ". Zipcode: " + zipcode +
-    //     ". This is an anonymous, machine generated text. Please do not reply."
-    // }).then((messsage) => callback(true,"Success.",200))
-    //     .catch((messsage) => callback(false,"Internal server error.",500));
+    twilioClient.messages.create({
+        from: process.env.TWILIO_NUMBER,
+        to: process.env.BEN_NUMBER,
+        body: "Emergency " + emergencyID + " has recieved an updated address: " + address + ". Zipcode: " + zipcode +
+        ". This is an anonymous, machine generated text. Please do not reply."
+    }).then((messsage) => callback(true,"Success.",200))
+        .catch((messsage) => callback(false,"Internal server error.",500));
 }
 
 function getLocationJSON(emergencyID) {
