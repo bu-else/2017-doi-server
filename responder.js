@@ -10,10 +10,10 @@ const twilioClient = require('twilio')(
     process.env.TWILIO_TOKEN
 );
 
-var deviceToAddress = {};
-var deviceToLatLng = {};
+var emergencyToAddress = {};
+var emergencyToLatLng = {};
 
-function handleLatLng(uuid,latLng,callback) {
+function handleLatLng(emergencyID,latLng,callback) {
     mapsClient.reverseGeocode({
             latlng: latLng,
             result_type: ['country', 'street_address'],
@@ -28,14 +28,14 @@ function handleLatLng(uuid,latLng,callback) {
             }
             if (!err) {
                 const address = response.json.results[0]["formatted_address"];
-                deviceToAddress[uuid] = address;
-                deviceToLatLng[uuid] = latLng;
+                emergencyToAddress[emergencyID] = address;
+                emergencyToLatLng[emergencyID] = latLng;
                 console.log("REMOVE THIS");
                 callback(true,"Success",200);
                 // twilioClient.messages.create({
                 //     from: process.env.TWILIO_NUMBER,
                 //     to: process.env.BEN_NUMBER,
-                //     body: "This text is sent to report an opioid overdose at " + address + ". This is emergency " + uuid +
+                //     body: "This text is sent to report an opioid overdose at " + address + ". This is emergency " + emergencyID +
                 //     ". This is an anonymous, machine generated text. Please do not reply."
                 // }).then((messsage) => callback(true,"Success.",200))
                 //     .catch((messsage) => callback(false,"Internal server error.",500));
@@ -47,37 +47,37 @@ function handleLatLng(uuid,latLng,callback) {
     )
 }
 
-function handleAddress(uuid, address, zipcode, callback) {
+function handleAddress(emergencyID, address, zipcode, callback) {
     // Because we are just receiving a street address and a zipcode, without a city, state or country
     // we insert it carefully
-    oldAddress = deviceToAddress[uuid];
+    oldAddress = emergencyToAddress[emergencyID];
     formatted = oldAddress.split(",");
     formatted[0] = address;
     formatted[2] = formatted[2].slice(0,4) + zipcode;
-    deviceToAddress[uuid] = formatted.join()
+    emergencyToAddress[emergencyID] = formatted.join()
     console.log("REMOVE THIS");
     callback(true,"Success",200);
     // twilioClient.messages.create({
     //     from: process.env.TWILIO_NUMBER,
     //     to: process.env.BEN_NUMBER,
-    //     body: "Emergency " + uuid + " has recieved an updated address: " + address + ". Zipcode: " + zipcode +
+    //     body: "Emergency " + emergencyID + " has recieved an updated address: " + address + ". Zipcode: " + zipcode +
     //     ". This is an anonymous, machine generated text. Please do not reply."
     // }).then((messsage) => callback(true,"Success.",200))
     //     .catch((messsage) => callback(false,"Internal server error.",500));
 }
 
-function getLocationJSON(uuid) {
-    const address = deviceToAddress[uuid];
-    const latLng = deviceToLatLng[uuid];
+function getLocationJSON(emergencyID) {
+    const address = emergencyToAddress[emergencyID];
+    const latLng = emergencyToLatLng[emergencyID];
     if (!address || !latLng) {
         return undefined
     }
     return JSON.stringify({"address":address,"latLng":latLng})
 }
 
-function expireLocation(uuid) {
-    delete deviceToAddress[uuid];
-    delete deviceToLatLng[uuid];
+function expireLocation(emergencyID) {
+    delete emergencyToAddress[emergencyID];
+    delete emergencyToLatLng[emergencyID];
 }
 
 module.exports = {
