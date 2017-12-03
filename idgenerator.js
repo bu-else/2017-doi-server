@@ -22,7 +22,7 @@ function makeByDevice(deviceID) {
     emergencyToDevice[emergencyID] = deviceID;
     return testID;
   }
-  
+
   if (deviceToEmergency[deviceID]) {
     throw "Device already has an emergency";
   }
@@ -79,8 +79,8 @@ function endByEmergency(emergencyID) {
 
 module.exports = {
     makeByDevice,
-    getByDevice,
-    setStageByDevice,
-    endByDevice
+    getEmergencyByDevice,
+    setStageByEmergency,
+    endByEmergency
 };
 
