@@ -1,14 +1,22 @@
 const emergencyIDLength = 4;
-// Extremely small likelihood of timing out unless we are genuinely full
-// We have 36^4 = 1.6 million possible IDs
-
 const maxAttempts = 10000; 
+// Extremely small likelihood of timing due to infinite loop out unless we are genuinely full.
+// We have 36^4 = 1.6 million possible IDs.
+const testID = "TEST";
+
 var deviceToEmergency = {};
-var usedEmergencyID = {};
+var usedEmergencyID = {testID:true};
+// No one should ever generate the testID except for testing purposes.
 var deviceToStage = {};
 
 function makeByDevice(deviceID) {
   const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+  if (deviceID == "computer-id") {
+    console.log("Generating the test ID");
+    deviceToEmergency[deviceID] = genID;
+    return testID;
+  }
 
   var genID;
   var called = 0;
