@@ -14,7 +14,7 @@ function makeByDevice(deviceID) {
 
   if (deviceID == "computer-id") {
     console.log("Generating the test ID");
-    deviceToEmergency[deviceID] = genID;
+    deviceToEmergency[deviceID] = testID;
     return testID;
   }
 
