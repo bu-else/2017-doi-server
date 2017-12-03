@@ -69,7 +69,7 @@ function handleAddress(uuid, address, zipcode, callback) {
 function getLocationJSON(uuid) {
     const address = deviceToAddress[uuid];
     const latLng = deviceToLatLng[uuid];
-    if (address == undefined || latLng == undefined) {
+    if (!address || !latLng) {
         return undefined
     }
     return JSON.stringify({"address":address,"latLng":latLng})
