@@ -84,6 +84,7 @@ function smsHandler(response, body, phoneNumber) {
         break;
       case "no":
         responder.acceptDispatch(args[1].toUpperCase(),false,callback);
+        endEmergency(undefined,args[1].toUpperCase(),callback);
         break;
       default:
         callback(false, "Request not found.", 404);
@@ -206,9 +207,9 @@ function fetchAddress(deviceID, emergencyID, response, callback) {
     }
   }
 
-  json = responder.getLocationJSON(emergencyID,callback);
+  json = responder.getLocationJSON(emergencyID);
   if (!json) {
-    callback(false, "Internal server error.", 500);
+    callback(false, "Location not found.", 500);
     return;
   }
   response.setHeader('Content-Type', 'application/json');
