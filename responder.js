@@ -105,11 +105,16 @@ function prepareDispatch(emergencyID, phoneNumber, response, isSMS) {
 }
 
 function acceptDispatch(emergencyID,canHandle,callback) {
+  if (!emergergencyToDispatch.hasOwnProperty(emergencyID)) {
+    console.log("Trying to access non-existant key:",emergencyID,"in dictionary",emergergencyToDispatch);
+    callback(false, "Emergency not found.", 500);
+    return;
+  }
   emergergencyToDispatch[emergencyID](canHandle);
 }
 
 
-function getLocationJSON(emergencyID,callback) {
+function getLocationJSON(emergencyID) {
   const address = emergencyToAddress[emergencyID];
   const latLng = emergencyToLatLng[emergencyID];
   if (!address || !latLng) {
