@@ -76,7 +76,7 @@ function prepareDispatch(emergencyID, phoneNumber, response, isSMS) {
   var called = false;
   var callback;
   if (isSMS) {
-    callback = (canHandle) {
+    callback = (canHandle) => {
       if (called) {
         console.log("Calling callback twice.");
         return;
@@ -90,8 +90,9 @@ function prepareDispatch(emergencyID, phoneNumber, response, isSMS) {
         to: phoneNumber,
         body: canHandle ? handledText : failedText
       }).catch((messsage) => console.log("Unable to respond to the caller."));
+    }
   } else {
-    callback = (canHandle) {
+    callback = (canHandle) => {
       if (called) {
         console.log("Calling callback twice.");
         return;
