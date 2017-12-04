@@ -79,12 +79,12 @@ function smsHandler(response, body, phoneNumber) {
         callback(false, "Invalid request.", 400);
         return;
     }
-    switch (handleOption.toLowerCase()) {
+    switch (args[0].toLowerCase()) {
       case "yes":
-        responder.acceptDispatch(true,emergencyID.toUpperCase());
+        responder.acceptDispatch(true,args[1].toUpperCase());
         break;
       case "no":
-        responder.acceptDispatch(false,emergencyID.toUpperCase());
+        responder.acceptDispatch(false,args[1].toUpperCase());
         break;
       default:
         callback(false, "Request not found.", 404);
