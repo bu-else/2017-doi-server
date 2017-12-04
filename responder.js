@@ -101,6 +101,7 @@ function prepareDispatch(emergencyID, phoneNumber, response, isSMS) {
       response.end(canHandle.toString());
     }
   }
+  console.log(emergencyID,callback)
   emergergencyToDispatch[emergencyID] = callback;
 }
 
