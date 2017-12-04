@@ -79,12 +79,13 @@ function smsHandler(response, body, phoneNumber) {
         callback(false, "Invalid request.", 400);
         return;
     }
+    console.logs(args[0].toLowerCase);
     switch (args[0].toLowerCase()) {
       case "yes":
-        responder.acceptDispatch(true,args[1].toUpperCase());
+        responder.acceptDispatch(true,args[1].toUpperCase(),callback);
         break;
       case "no":
-        responder.acceptDispatch(false,args[1].toUpperCase());
+        responder.acceptDispatch(false,args[1].toUpperCase(),callback);
         break;
       default:
         callback(false, "Request not found.", 404);
@@ -207,7 +208,7 @@ function fetchAddress(deviceID, emergencyID, response, callback) {
     }
   }
 
-  json = responder.getLocationJSON(emergencyID);
+  json = responder.getLocationJSON(emergencyID,callback);
   if (!json) {
     callback(false, "Internal server error.", 500);
     return;

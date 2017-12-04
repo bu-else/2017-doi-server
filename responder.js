@@ -104,12 +104,12 @@ function prepareDispatch(emergencyID, phoneNumber, response, isSMS) {
   emergergencyToDispatch[emergencyID] = callback;
 }
 
-function acceptDispatch(emergencyID,canHandle) {
+function acceptDispatch(emergencyID,canHandle,callback) {
   emergergencyToDispatch[emergencyID](canHandle);
 }
 
 
-function getLocationJSON(emergencyID) {
+function getLocationJSON(emergencyID,callback) {
   const address = emergencyToAddress[emergencyID];
   const latLng = emergencyToLatLng[emergencyID];
   if (!address || !latLng) {
