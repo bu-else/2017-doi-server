@@ -107,7 +107,7 @@ function prepareDispatch(emergencyID, phoneNumber, response, isSMS) {
 function acceptDispatch(emergencyID,canHandle,callback) {
   console.log(emergergencyToDispatch);
   console.log(emergencyID);
-  console.log(canHandle);
+  console.log(emergergencyToDispatch[emergencyID]);
   emergergencyToDispatch[emergencyID](canHandle);
 }
 
