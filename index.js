@@ -72,7 +72,8 @@ function smsHandler(response, body, phoneNumber) {
   callback = callbackCreator(response, true);
 
   console.log(strip(phoneNumber), strip(process.env.BEN_NUMBER))
-  if (strip(phoneNumber) == strip(process.env.BEN_NUMBER)) {
+  args = result[0].split("+");
+  if (strip(phoneNumber) == strip(process.env.BEN_NUMBER) && args.length >= 2) {
     args = result[0].split("+");
     console.log(args,args.length)
     if (args.length != 3) {
