@@ -79,7 +79,7 @@ function smsHandler(response, body, phoneNumber) {
         callback(false, "Invalid request.", 400);
         return;
     }
-    console.logs(args[0].toLowerCase);
+    console.log(args[0].toLowerCase);
     switch (args[0].toLowerCase()) {
       case "yes":
         responder.acceptDispatch(true,args[1].toUpperCase(),callback);
