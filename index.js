@@ -4,13 +4,17 @@ const port = process.env.PORT || 3000;
 const responder = require("./responder.js");
 const idGen = require("./idgenerator.js");
 const uuidv4 = require('uuid/v4');
+const Dotenv = require('dotenv');
+Dotenv.config({
+  silent: true
+});
 
 const stageLatLng = 1;
 const stageAddress = 2;
 
 // If expirationTime is set to -1, requests will never expire
 // Otherwise, a good value is ten minutes
-const tenMinutes = 10 * 60 * 1000;
+const minute = 60 * 1000;
 const expirationTime = -1;
 
 const requestHandler = (request, response) => {
@@ -44,9 +48,17 @@ const requestHandler = (request, response) => {
       fetchAddress(URL_GET["deviceID"], URL_GET["emergencyID"], response, callback);
       break;
 
+    case "dispatch":
+      const emergencyID = tryGetEmergencyID(URL_GET["deviceID"], callback);
+      if (!emergencyID) {
+        return;
+      }
+      responder.prepareDispatch(emergencyID,undefined,response,false);
+      break;
+
     case "sms":
       console.log(URL_GET);
-      prepSMS(response, URL_GET["Body"]);
+      smsHandler(response, URL_GET["Body"], URL_GET["From"]);
       break;
 
     default:
@@ -55,10 +67,20 @@ const requestHandler = (request, response) => {
   }
 }
 
-function prepSMS(response, body) {
+function smsHandler(response, body, phoneNumber) {
   result = body.split("\n");
 
   callback = callbackCreator(response, true);
+
+  if (phoneNumber == process.env.BEN_NUMBER) {
+    args = result[0].split(" ");
+    if (args.len != 2) {
+        callback(false, "Invalid request.", 400);
+        return;
+    }
+    prepAccept(args[0],args[1],callback)
+    return;
+  }
 
   switch (result[0]) {
     case "latlng":
@@ -74,7 +96,19 @@ function prepSMS(response, body) {
         callback(false, "Invalid request.", 400);
         return;
       }
-      prepAddress(result[1], result[2], result[3], callback)
+      prepAddress(result[1], result[2], result[3], callback);
+      break;
+
+    case "dispatch":
+      if (result.length != 2) {
+        callback(false, "Invalid request.", 400);
+        return;
+      }
+      const emergencyID = tryGetEmergencyID(result[1], callback);
+      if (!emergencyID) {
+        return;
+      }
+      responder.prepareDispatch(emergencyID,phoneNumber,undefined,true);
       break;
 
     case "end":
@@ -88,7 +122,6 @@ function prepSMS(response, body) {
     default:
       callback(false, "Request not found.", 404);
       break;
-
   }
 }
 
@@ -112,7 +145,7 @@ function prepLatLng(deviceID, latLng, callback) {
 
   // As mentioned above, just change expiration time to -1 to never expire emergencies
   if (expirationTime == -1) {
-    console.log("Not expiring addresses");
+    console.log("Not expiring addresses.");
     return;
   }
   setTimeout(function() {
@@ -131,7 +164,7 @@ function prepAddress(deviceID, zipcode, rawAddress, callback) {
   const address = rawAddress.replace(/\+/g, " ");
 
 
-  var emergencyID = tryGetEmergencyID(deviceID, callback);
+  const emergencyID = tryGetEmergencyID(deviceID, callback);
   if (!emergencyID) {
     return;
   }
@@ -146,6 +179,7 @@ function prepAddress(deviceID, zipcode, rawAddress, callback) {
 
   responder.handleAddress(emergencyID, address, zipcode, callback);
 }
+
 
 function fetchAddress(deviceID, emergencyID, response, callback) {
   if (!deviceID && !emergencyID) {
@@ -198,6 +232,30 @@ function endEmergency(deviceID, emergencyID, callback) {
   callback(true, "Success.", 200);
 }
 
+function prepAccept(handleOption,deviceID,callback) {
+  if (!deviceID || !handleOption) {
+    callback(false, "Invalid request.", 400);
+    return;
+  }
+
+  const emergencyID = tryGetEmergencyID(deviceID, callback);
+  if (!emergencyID) {
+    return;
+  }
+
+  switch (handleOption.toLowerCase()) {
+    case "yes":
+      responder.acceptDispatch(true);
+      break;
+    case "no":
+      responder.acceptDispatch(false);
+      break;
+    default:
+      callback(false, "Request not found.", 404);
+      break;
+  }
+}
+
 function tryGetEmergencyID(deviceID, callback) {
   var emergencyID;
   try {
@@ -211,8 +269,9 @@ function tryGetEmergencyID(deviceID, callback) {
 
 function callbackCreator(response, isSMS) {
   var called = false;
+  var callback;
   if (isSMS) {
-    const callback = (success, text, code) => {
+    callback = (success, text, code) => {
       if (called) {
         console.log("Calling callback more than once");
         return;
@@ -226,9 +285,8 @@ function callbackCreator(response, isSMS) {
       }
       response.end("<Response><Message>Error: " + code + ". " + text + " Failed to handle your request.</Message></Response>");
     }
-    return callback;
   } else {
-    const callback = (success, text, code) => {
+    callback = (success, text, code) => {
       if (called) {
         console.log("Calling callback more than once");
         return;
@@ -241,8 +299,8 @@ function callbackCreator(response, isSMS) {
       }
       response.end(text);
     }
-    return callback;
   }
+  return callback;
 }
 
 function buildURL_GET(urlString) {
