@@ -45,6 +45,7 @@ const requestHandler = (request, response) => {
       break;
 
     case "sms":
+      console.log(URL_GET);
       prepSMS(response, URL_GET["Body"]);
       break;
 
