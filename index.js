@@ -74,7 +74,8 @@ function smsHandler(response, body, phoneNumber) {
   console.log(strip(phoneNumber), strip(process.env.BEN_NUMBER))
   if (strip(phoneNumber) == strip(process.env.BEN_NUMBER)) {
     args = result[0].split(" ");
-    if (args.len != 2) {
+    console.log(args,args.length)
+    if (args.length != 2) {
         callback(false, "Invalid request.", 400);
         return;
     }
