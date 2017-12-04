@@ -57,7 +57,6 @@ const requestHandler = (request, response) => {
       break;
 
     case "sms":
-      console.log(URL_GET);
       smsHandler(response, URL_GET["Body"], URL_GET["From"]);
       break;
 
@@ -72,13 +71,24 @@ function smsHandler(response, body, phoneNumber) {
 
   callback = callbackCreator(response, true);
 
+  console.log(phoneNumber,process.env.BEN_NUMBER)
   if (phoneNumber == process.env.BEN_NUMBER) {
     args = result[0].split(" ");
     if (args.len != 2) {
         callback(false, "Invalid request.", 400);
         return;
     }
-    prepAccept(args[0],args[1],callback)
+    switch (handleOption.toLowerCase()) {
+      case "yes":
+        responder.acceptDispatch(true,emergencyID.toUpperCase());
+        break;
+      case "no":
+        responder.acceptDispatch(false,emergencyID.toUpperCase());
+        break;
+      default:
+        callback(false, "Request not found.", 404);
+        break;
+    }
     return;
   }
 
@@ -230,30 +240,6 @@ function endEmergency(deviceID, emergencyID, callback) {
   }
 
   callback(true, "Success.", 200);
-}
-
-function prepAccept(handleOption,deviceID,callback) {
-  if (!deviceID || !handleOption) {
-    callback(false, "Invalid request.", 400);
-    return;
-  }
-
-  const emergencyID = tryGetEmergencyID(deviceID, callback);
-  if (!emergencyID) {
-    return;
-  }
-
-  switch (handleOption.toLowerCase()) {
-    case "yes":
-      responder.acceptDispatch(true);
-      break;
-    case "no":
-      responder.acceptDispatch(false);
-      break;
-    default:
-      callback(false, "Request not found.", 404);
-      break;
-  }
 }
 
 function tryGetEmergencyID(deviceID, callback) {
