@@ -71,8 +71,8 @@ function smsHandler(response, body, phoneNumber) {
 
   callback = callbackCreator(response, true);
 
-  console.log(phoneNumber,process.env.BEN_NUMBER)
-  if (phoneNumber == process.env.BEN_NUMBER) {
+  console.log(strip(phoneNumber), strip(process.env.BEN_NUMBER))
+  if (strip(phoneNumber) == strip(process.env.BEN_NUMBER)) {
     args = result[0].split(" ");
     if (args.len != 2) {
         callback(false, "Invalid request.", 400);
@@ -306,6 +306,10 @@ function buildURL_GET(urlString) {
     URL_GET[aux[0]] = aux[1];
   }
   return URL_GET;
+}
+
+function strip(phoneNumber) {
+  return phoneNumber.replace(/ /g, "").replace(/\(/g, "").replace(/\)/g, "").replace(/\-/g, "");
 }
 
 const server = http.createServer(requestHandler);
