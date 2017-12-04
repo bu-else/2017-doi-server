@@ -72,9 +72,8 @@ function smsHandler(response, body, phoneNumber) {
   callback = callbackCreator(response, true);
 
   console.log(strip(phoneNumber), strip(process.env.BEN_NUMBER))
-  args = result[0].split("+");
+  const args = result[0].split("+");
   if (strip(phoneNumber) == strip(process.env.BEN_NUMBER) && args.length >= 2) {
-    args = result[0].split("+");
     console.log(args,args.length)
     if (args.length != 3) {
         callback(false, "Invalid request.", 400);
@@ -117,6 +116,7 @@ function smsHandler(response, body, phoneNumber) {
         callback(false, "Invalid request.", 400);
         return;
       }
+      console.log(result[1])
       const emergencyID = tryGetEmergencyID(result[1], callback);
       if (!emergencyID) {
         return;
