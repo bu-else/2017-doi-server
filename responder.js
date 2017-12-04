@@ -39,8 +39,8 @@ function handleLatLng(emergencyID, latLng, callback) {
             from: process.env.TWILIO_NUMBER,
             to: process.env.BEN_NUMBER,
             body: "This text is sent to report an opioid overdose at " + address + ". This is emergency " + emergencyID +
-              ". If you are able to respond to this request, please respond YES " +  emergencyID + "."
-              " Otherwise, respond NO" +  emergencyID + " if you are unable to respond."
+              ". If you are able to handle to this emergency, please respond YES " +  emergencyID + "." +
+              " Otherwise, please respond NO" +  emergencyID + " if you are unable to handle this emergency."
           }).then((messsage) => callback(true, "Success.", 200))
           .catch((messsage) => callback(false, "Internal server error.", 500));
       } else {
