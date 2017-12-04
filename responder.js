@@ -101,12 +101,13 @@ function prepareDispatch(emergencyID, phoneNumber, response, isSMS) {
       response.end(canHandle.toString());
     }
   }
-  console.log(emergencyID,callback)
   emergergencyToDispatch[emergencyID] = callback;
 }
 
 function acceptDispatch(emergencyID,canHandle,callback) {
-  console.log(emergergencyToDispatch[emergencyID]);
+  console.log(emergergencyToDispatch);
+  console.log(emergencyID);
+  console.log(canHandle);
   emergergencyToDispatch[emergencyID](canHandle);
 }
 
