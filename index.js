@@ -82,10 +82,10 @@ function smsHandler(response, body, phoneNumber) {
     console.log(args[0].toLowerCase());
     switch (args[0].toLowerCase()) {
       case "yes":
-        responder.acceptDispatch(true,args[1].toUpperCase(),callback);
+        responder.acceptDispatch(args[1].toUpperCase(),true,callback);
         break;
       case "no":
-        responder.acceptDispatch(false,args[1].toUpperCase(),callback);
+        responder.acceptDispatch(args[1].toUpperCase(),false,callback);
         break;
       default:
         callback(false, "Request not found.", 404);
