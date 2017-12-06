@@ -12,11 +12,16 @@ const twilioClient = require('twilio')(
   process.env.TWILIO_TOKEN
 );
 
+const dispatchPending = "Pending";
+const dispatchAccepted = "Accepted";
+const dispatchRejected = "Rejected";
+var emergencyToDispatch = {};
+
 var emergencyToAddress = {};
 var emergencyToLatLng = {};
 // Note that expires is done on the device so that there is no danger of the server being unable
 // to send a rejection in time.
-var emergergencyToDispatch = {};
+var emergencyToCallback = {};
 
 function handleLatLng(emergencyID, latLng, callback) {
   mapsClient.reverseGeocode({
@@ -68,13 +73,14 @@ function handleAddress(emergencyID, address, zipcode, callback) {
     .catch((messsage) => callback(false, "Internal server error.", 500));
 }
 
-function prepareDispatch(emergencyID, phoneNumber, response, isSMS) {
-  if ((isSMS && !phoneNumber) || (!isSMS && !response)) {
-    console.log("Cannot respond to the caller.");
+function prepareDispatch(emergencyID, phoneNumber, isSMS) {
+  if ((isSMS && !phoneNumber)) {
+    console.log("Cannot respond to the SMS caller.");
     return;
   }
   var called = false;
   var callback;
+  emergencyToDispatch[emergencyID] = dispatchPending;
   if (isSMS) {
     callback = (canHandle) => {
       if (called) {
@@ -84,6 +90,7 @@ function prepareDispatch(emergencyID, phoneNumber, response, isSMS) {
 
       const handledText = "Help is on the way!";
       const failedText = "The dispatcher is unable to respond to your request. Please call 911!"
+      emergencyToDispatch[emergencyID] = canHandle ? dispatchAccepted : dispatchRejected;
 
       twilioClient.messages.create({
         from: process.env.TWILIO_NUMBER,
@@ -98,21 +105,24 @@ function prepareDispatch(emergencyID, phoneNumber, response, isSMS) {
         return;
       }
 
-      response.end(canHandle.toString());
+      emergencyToDispatch[emergencyID] = canHandle ? dispatchAccepted : dispatchRejected;
     }
   }
-  emergergencyToDispatch[emergencyID] = callback;
+  emergencyToCallback[emergencyID] = callback;
 }
 
 function acceptDispatch(emergencyID,canHandle,callback) {
-  if (!emergergencyToDispatch.hasOwnProperty(emergencyID)) {
-    console.log("Trying to access non-existant key:",emergencyID,"in dictionary",emergergencyToDispatch);
+  if (!emergencyToCallback.hasOwnProperty(emergencyID)) {
+    console.log("Trying to access non-existant key:",emergencyID,"in dictionary",emergencyToCallback);
     callback(false, "Emergency not found.", 500);
     return;
   }
-  emergergencyToDispatch[emergencyID](canHandle);
+  emergencyToCallback[emergencyID](canHandle);
 }
 
+function getDispatchStatus(emergencyID) {
+  return emergencyToDispatch[emergencyID];
+}
 
 function getLocationJSON(emergencyID) {
   const address = emergencyToAddress[emergencyID];

@@ -12,6 +12,7 @@ var deviceToEmergency = {};
 var emergencyToDevice = {};
 var emergencyToStage = {};
 
+
 function makeByDevice(deviceID) {
   const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 

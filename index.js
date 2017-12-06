@@ -33,7 +33,14 @@ const requestHandler = (request, response) => {
 
   switch (result[1]) {
     case "latlng":
-      prepLatLng(URL_GET["deviceID"], URL_GET["LatLng"], callback);
+      success = prepLatLng(URL_GET["deviceID"], URL_GET["LatLng"], callback);
+      if (!success) {
+        // Note, success is not the result of the callback, it just means we got as far as successfully generating an ID
+        // If we have an error with our Twilio or Google Maps calls, success will still be true, but callback will handle that.
+        return;
+      }
+      emergencyId = idgenerator.getEmergencyByDevice(result[1]);
+      responder.prepareDispatch(emergencyID,undefined,false);
       break;
 
     case "address":
@@ -44,16 +51,12 @@ const requestHandler = (request, response) => {
       endEmergency(URL_GET["deviceID"], URL_GET["emergencyID"], callback);
       break;
 
-    case "fetch":
-      fetchAddress(URL_GET["deviceID"], URL_GET["emergencyID"], response, callback);
+    case "dispatch":
+      getDispatch(URL_GET["deviceID"],response,callback);
       break;
 
-    case "dispatch":
-      const emergencyID = tryGetEmergencyID(URL_GET["deviceID"], callback);
-      if (!emergencyID) {
-        return;
-      }
-      responder.prepareDispatch(emergencyID,undefined,response,false);
+    case "fetch":
+      fetchAddress(URL_GET["deviceID"], URL_GET["emergencyID"], response, callback);
       break;
 
     case "sms":
@@ -71,20 +74,20 @@ function smsHandler(response, body, phoneNumber) {
 
   callback = callbackCreator(response, true);
 
-  const args = result[0].split("+");
-  if (strip(phoneNumber) == strip(process.env.BEN_NUMBER) && args.length >= 2) {
-    if (args.length != 3) {
+  const firstLine = result[0].split("+");
+  if (strip(phoneNumber) == strip(process.env.BEN_NUMBER) && firstLine.length >= 2) {
+    if (firstLine.length != 3) {
         callback(false, "Invalid request.", 400);
         return;
     }
 
-    switch (args[0].toLowerCase()) {
+    switch (firstLine[0].toLowerCase()) {
       case "yes":
-        responder.acceptDispatch(args[1].toUpperCase(),true,callback);
+        responder.acceptDispatch(firstLine[1].toUpperCase(),true,callback);
         break;
       case "no":
-        responder.acceptDispatch(args[1].toUpperCase(),false,callback);
-        endEmergency(undefined,args[1].toUpperCase(),callback);
+        responder.acceptDispatch(firstLine[1].toUpperCase(),false,callback);
+        endEmergency(undefined,firstLine[1].toUpperCase(),callback);
         break;
       default:
         callback(false, "Request not found.", 404);
@@ -99,7 +102,14 @@ function smsHandler(response, body, phoneNumber) {
         callback(false, "Invalid request.", 400);
         return;
       }
-      prepLatLng(result[1], result[2], callback);
+      success = prepLatLng(result[1], result[2], callback));
+      if (!success) {
+        // Note, success is not the result of the callback, it just means we got as far as successfully generating an ID
+        // If we have an error with our Twilio or Google Maps calls, success will still be true, but callback will handle that.
+        return;
+      }
+      emergencyId = idgenerator.getEmergencyByDevice(result[1]);
+      responder.prepareDispatch(emergencyID,phoneNumber,true);
       break;
 
     case "address":
@@ -108,18 +118,6 @@ function smsHandler(response, body, phoneNumber) {
         return;
       }
       prepAddress(result[1], result[2], result[3], callback);
-      break;
-
-    case "dispatch":
-      if (result.length != 2) {
-        callback(false, "Invalid request.", 400);
-        return;
-      }
-      const emergencyID = tryGetEmergencyID(result[1], callback);
-      if (!emergencyID) {
-        return;
-      }
-      responder.prepareDispatch(emergencyID,phoneNumber,undefined,true);
       break;
 
     case "end":
@@ -139,7 +137,7 @@ function smsHandler(response, body, phoneNumber) {
 function prepLatLng(deviceID, latLng, callback) {
   if (!deviceID || !latLng) {
     callback(false, "Invalid request.", 400);
-    return;
+    return false;
   }
 
   var emergencyID;
@@ -149,7 +147,7 @@ function prepLatLng(deviceID, latLng, callback) {
   } catch (e) {
     console.log(e);
     callback(false, "Internal server error.", 500);
-    return;
+    return false;
   }
 
   responder.handleLatLng(emergencyID, latLng, callback);
@@ -157,7 +155,7 @@ function prepLatLng(deviceID, latLng, callback) {
   // As mentioned above, just change expiration time to -1 to never expire emergencies
   if (expirationTime == -1) {
     console.log("Not expiring addresses.");
-    return;
+    return true;
   }
   setTimeout(function() {
     endByEmergency(emergencyID, function(s, t, c) {
@@ -165,6 +163,7 @@ function prepLatLng(deviceID, latLng, callback) {
       console.log("Result of timeout was: ", s, t, c);
     });
   }, expirationTime);
+  return true;
 }
 
 function prepAddress(deviceID, zipcode, rawAddress, callback) {
@@ -189,8 +188,22 @@ function prepAddress(deviceID, zipcode, rawAddress, callback) {
   }
 
   responder.handleAddress(emergencyID, address, zipcode, callback);
+
 }
 
+function getDispatch(deviceID,response,callback) {
+  if (!deviceID) {
+    callback(false, "Invalid request.", 400);
+    return;
+  }
+
+  emergencyID = tryGetEmergencyID(deviceID, callback);
+  if (!emergencyID) {
+    return;
+  }
+
+  response.end(responder.getDispatchStatus(emergencyID));
+}
 
 function fetchAddress(deviceID, emergencyID, response, callback) {
   if (!deviceID && !emergencyID) {
