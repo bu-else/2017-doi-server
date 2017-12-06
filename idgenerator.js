@@ -63,7 +63,7 @@ function setStageByEmergency(emergencyID,stage) {
   }
   currentStage = emergencyToStage[emergencyID];
   if (currentStage >= stage) {
-    throw "Emergency: " + emergencyID + "\'s stage is being set out of order. Current stage: " +
+    throw "Emergency " + emergencyID + " stage is being set out of order. Current stage: " +
      currentStage + ". New Stage: " + stage + ".";
   }
   emergencyToStage[emergencyID] = stage;
@@ -71,7 +71,7 @@ function setStageByEmergency(emergencyID,stage) {
 
 
 function endByEmergency(emergencyID) {
-  // We don't free up usedEmergencyID because it has already been used
+  // We don't free up usedEmergencyID because it has already been used and will never be used again.
   deviceID = emergencyToDevice[emergencyID];
   delete emergencyToDevice[emergencyID];
   delete deviceToEmergency[deviceID];
