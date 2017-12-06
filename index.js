@@ -39,7 +39,7 @@ const requestHandler = (request, response) => {
         // If we have an error with our Twilio or Google Maps calls, success will still be true, but callback will handle that.
         return;
       }
-      emergencyId = idgenerator.getEmergencyByDevice(result[1]);
+      emergencyId = idGen.getEmergencyByDevice(result[1]);
       responder.prepareDispatch(emergencyID,undefined,false);
       break;
 
