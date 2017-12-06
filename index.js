@@ -76,11 +76,10 @@ function smsHandler(response, body, phoneNumber) {
 
     switch (firstLine[0].toLowerCase()) {
       case "yes":
-        responder.acceptDispatch(firstLine[1].toUpperCase(),true,callback);
+        handleDispatch(firstLine[1].toUpperCase(),true,callback);
         break;
       case "no":
-        responder.acceptDispatch(firstLine[1].toUpperCase(),false,callback);
-        endEmergency(undefined,firstLine[1].toUpperCase(),callback);
+        handleDispatch(firstLine[1].toUpperCase(),false,callback);
         break;
       default:
         callback(false, "Request not found.", 404);
@@ -241,6 +240,18 @@ function endEmergency(deviceID, emergencyID, callback) {
   }
 
   callback(true, "Success.", 200);
+}
+
+function handleDispatch(emergencyID,canHandle,callback) {
+  success = responder.acceptDispatch(emergencyID,canHandle,callback);
+  if (!success) {
+    return;
+  }
+  if (canHandle) {
+    callback(true,"Success.",200);
+  } else {
+    endEmergency(undefined,emergencyID,callback);
+  }
 }
 
 function tryGetEmergencyID(deviceID, callback) {
