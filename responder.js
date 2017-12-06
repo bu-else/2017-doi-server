@@ -143,5 +143,6 @@ module.exports = {
   getLocationJSON,
   expireLocation,
   prepareDispatch,
-  acceptDispatch
+  acceptDispatch,
+  getDispatchStatus
 };
