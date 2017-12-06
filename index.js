@@ -33,14 +33,7 @@ const requestHandler = (request, response) => {
 
   switch (result[1]) {
     case "latlng":
-      success = prepLatLng(URL_GET["deviceID"], URL_GET["LatLng"], callback);
-      if (!success) {
-        // Note, success is not the result of the callback, it just means we got as far as successfully generating an ID
-        // If we have an error with our Twilio or Google Maps calls, success will still be true, but callback will handle that.
-        return;
-      }
-      emergencyId = idGen.getEmergencyByDevice(result[1]);
-      responder.prepareDispatch(emergencyID,undefined,false);
+      success = prepLatLng(URL_GET["deviceID"], URL_GET["LatLng"], undefined, false, callback);
       break;
 
     case "address":
@@ -102,14 +95,7 @@ function smsHandler(response, body, phoneNumber) {
         callback(false, "Invalid request.", 400);
         return;
       }
-      success = prepLatLng(result[1], result[2], callback);
-      if (!success) {
-        // Note, success is not the result of the callback, it just means we got as far as successfully generating an ID
-        // If we have an error with our Twilio or Google Maps calls, success will still be true, but callback will handle that.
-        return;
-      }
-      emergencyId = idgenerator.getEmergencyByDevice(result[1]);
-      responder.prepareDispatch(emergencyID,phoneNumber,true);
+      success = prepLatLng(result[1], result[2], phoneNumber, true, callback);
       break;
 
     case "address":
@@ -134,8 +120,8 @@ function smsHandler(response, body, phoneNumber) {
   }
 }
 
-function prepLatLng(deviceID, latLng, callback) {
-  if (!deviceID || !latLng) {
+function prepLatLng(deviceID, latLng, phoneNumber, isSMS, callback) {
+  if (!deviceID || !latLng || (!phoneNumber && isSMS)) {
     callback(false, "Invalid request.", 400);
     return false;
   }
@@ -150,6 +136,7 @@ function prepLatLng(deviceID, latLng, callback) {
     return false;
   }
 
+  responder.prepareDispatch(emergencyID,phoneNumber,isSMS);
   responder.handleLatLng(emergencyID, latLng, callback);
 
   // As mentioned above, just change expiration time to -1 to never expire emergencies

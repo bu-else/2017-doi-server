@@ -74,10 +74,6 @@ function handleAddress(emergencyID, address, zipcode, callback) {
 }
 
 function prepareDispatch(emergencyID, phoneNumber, isSMS) {
-  if ((isSMS && !phoneNumber)) {
-    console.log("Cannot respond to the SMS caller.");
-    return;
-  }
   var called = false;
   var callback;
   emergencyToDispatch[emergencyID] = dispatchPending;
