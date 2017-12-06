@@ -102,7 +102,7 @@ function smsHandler(response, body, phoneNumber) {
         callback(false, "Invalid request.", 400);
         return;
       }
-      success = prepLatLng(result[1], result[2], callback));
+      success = prepLatLng(result[1], result[2], callback);
       if (!success) {
         // Note, success is not the result of the callback, it just means we got as far as successfully generating an ID
         // If we have an error with our Twilio or Google Maps calls, success will still be true, but callback will handle that.
