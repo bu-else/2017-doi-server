@@ -280,12 +280,11 @@ function callbackCreator(response, isSMS) {
       called = true;
 
       if (!success) {
-        response.statusMessage = text;
-        response.status(code).end(text);
-      } else {
-        response.statusCode = code;
-        response.end(text);
+        response.writeHead(code, text, {
+          'Content-Length': Buffer.byteLength(text),
+          'Content-Type': 'text/plain' });
       }
+      response.end(text);
     }
   }
   return callback;
