@@ -111,10 +111,9 @@ function acceptDispatch(emergencyID,canHandle,callback) {
   if (!emergencyToCallback.hasOwnProperty(emergencyID)) {
     console.log("Trying to access non-existant key:",emergencyID,"in dictionary",emergencyToCallback);
     callback(false, "Emergency not found.", 500);
-    return false;
   }
   emergencyToCallback[emergencyID](canHandle);
-  return true;
+  callback(true,"Success.",200);
 }
 
 function getDispatchStatus(emergencyID) {
