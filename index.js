@@ -279,11 +279,11 @@ function callbackCreator(response, isSMS) {
       }
       called = true;
 
-      response.statusCode = code;
       if (!success) {
         response.statusMessage = text;
-      }
-      else {
+        response.status(code).end(text);
+      } else {
+        response.statusCode = code;
         response.end(text);
       }
     }
