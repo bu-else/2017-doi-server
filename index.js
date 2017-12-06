@@ -283,7 +283,9 @@ function callbackCreator(response, isSMS) {
       if (!success) {
         response.statusMessage = text;
       }
-      response.end(text);
+      else {
+        response.end(text);
+      }
     }
   }
   return callback;
