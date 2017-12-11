@@ -17,6 +17,7 @@ const doNotReply = "\nThis is an anonymous, machine generated text. Please do no
 const dispatchPending = "Pending";
 const dispatchAccepted = "Accepted";
 const dispatchRejected = "Rejected";
+const dispatchEnded = "Ended";
 var emergencyToDispatch = {};
 
 var emergencyToAddress = {};
@@ -152,7 +153,7 @@ function expireLocation(emergencyID,wasDispatcher,reason,callback) {
   .catch((messsage) => callback(false, "Internal server error.", 500));
 
   delete emergencyToCallback[emergencyID];
-  delete emergencyToDispatch[emergencyToDispatch];
+  emergencyToDispatch[emergencyToDispatch] = ended;
   delete emergencyToAddress[emergencyID];
   delete emergencyToPhoneNumber[emergencyID];
   delete emergencyToLatLng[emergencyID];
