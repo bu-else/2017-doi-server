@@ -18,6 +18,8 @@ const dispatchPending = "Pending";
 const dispatchAccepted = "Accepted";
 const dispatchRejected = "Rejected";
 const dispatchEnded = "Ended";
+
+const rejectedMessage = "The dispatcher is unable to respond to your request. Please call 911!" 
 var emergencyToDispatch = {};
 
 var emergencyToAddress = {};
@@ -90,7 +92,7 @@ function prepareDispatch(emergencyID, phoneNumber, isSMS) {
       }
 
       const handledText = "Help is on the way!" + doNotReply;
-      const failedText = "The dispatcher is unable to respond to your request. Please call 911!" + doNotReply;
+      const failedText = rejectedMessage + doNotReply;
       emergencyToDispatch[emergencyID] = canHandle ? dispatchAccepted : dispatchRejected;
 
       twilioClient.messages.create({
@@ -118,12 +120,18 @@ function acceptDispatch(emergencyID,canHandle,callback) {
     callback(false, "Emergency not found.", 500);
   }
   emergencyToCallback[emergencyID](canHandle);
-  callback(true,"Success.",200);
+  if (!canHandle) {
+    expireLocation(emergencyID,true,rejectedMessage,callback);
+    emergencyToDispatch[emergencyID] = dispatchRejected;
+  } else {
+    callback(true,"Success.",200);
+  }
 }
 
 function getDispatchStatus(emergencyID) {
   return emergencyToDispatch[emergencyID];
 }
+
 
 function getLocationJSON(emergencyID) {
   const address = emergencyToAddress[emergencyID];
