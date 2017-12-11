@@ -251,7 +251,7 @@ function endEmergency(deviceID, emergencyID, reason, callback) {
     responder.expireLocation(emergencyID,wasDispatcher,reason,callback);
   } catch (e) {
     console.error(e);
-    callback(false, "THIS IS GETTING CALLED", 500); // Internal server error.
+    callback(false, "Internal server error.", 500);
     return;
   }
 }

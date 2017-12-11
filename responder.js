@@ -158,7 +158,7 @@ function expireLocation(emergencyID,wasDispatcher,reason,callback) {
     to: reciever,
     body: reason + doNotReply
   }).then((messsage) => callback(true, "Success.", 200))
-  .catch((messsage) => callback(false, "Internal server error.", 500));
+  .catch((messsage) => {console.error(message); callback(false, "TWILLIO ERROR", 500)});
 
   delete emergencyToCallback[emergencyID];
   emergencyToDispatch[emergencyToDispatch] = dispatchEnded;
