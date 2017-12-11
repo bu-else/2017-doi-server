@@ -5,22 +5,31 @@ const responder = require("./responder.js");
 const idGen = require("./idgenerator.js");
 const uuidv4 = require('uuid/v4');
 const Dotenv = require('dotenv');
+<<<<<<< HEAD
 
+=======
+>>>>>>> aae651f215d7728844fb18e0b36d2f6d2ac52fb4
 Dotenv.config({
   silent: true
 });
 
 const stageLatLng = 1;
 const stageAddress = 2;
+<<<<<<< HEAD
 const stageEnded = -1;
+=======
+>>>>>>> aae651f215d7728844fb18e0b36d2f6d2ac52fb4
 
 // If expirationTime is set to -1, requests will never expire
 // Otherwise, a good value is ten minutes
 const minute = 60 * 1000;
 const expirationTime = -1;
+<<<<<<< HEAD
 const reasonExpired = "expired."
 const reasonDispatcher = "Your emergency was successfully handled by the dispatcher."
 const reasonCaller = "was ended successfully by its caller.";
+=======
+>>>>>>> aae651f215d7728844fb18e0b36d2f6d2ac52fb4
 
 const requestHandler = (request, response) => {
   if (request.url.toString() == "/") {
@@ -38,7 +47,11 @@ const requestHandler = (request, response) => {
 
   switch (result[1]) {
     case "latlng":
+<<<<<<< HEAD
       success = prepLatLng(URL_GET["deviceID"], URL_GET["LatLng"], URL_GET["From"], false, callback);
+=======
+      success = prepLatLng(URL_GET["deviceID"], URL_GET["LatLng"], undefined, false, callback);
+>>>>>>> aae651f215d7728844fb18e0b36d2f6d2ac52fb4
       break;
 
     case "address":
@@ -46,6 +59,7 @@ const requestHandler = (request, response) => {
       break;
 
     case "end":
+<<<<<<< HEAD
       var reason;
       if (URL_GET["deviceID"]) {
         reason = reasonCaller;
@@ -57,6 +71,13 @@ const requestHandler = (request, response) => {
 
     case "dispatch":
       getDispatch(URL_GET["deviceID"], response, callback);
+=======
+      endEmergency(URL_GET["deviceID"], URL_GET["emergencyID"], callback);
+      break;
+
+    case "dispatch":
+      getDispatch(URL_GET["deviceID"],response,callback);
+>>>>>>> aae651f215d7728844fb18e0b36d2f6d2ac52fb4
       break;
 
     case "fetch":
@@ -81,16 +102,28 @@ function smsHandler(response, body, phoneNumber) {
   const firstLine = result[0].split("+");
   if (strip(phoneNumber) == strip(process.env.BEN_NUMBER) && firstLine.length >= 2) {
     if (firstLine.length != 3) {
+<<<<<<< HEAD
       callback(false, "Invalid request.", 400);
       return;
+=======
+        callback(false, "Invalid request.", 400);
+        return;
+>>>>>>> aae651f215d7728844fb18e0b36d2f6d2ac52fb4
     }
 
     switch (firstLine[0].toLowerCase()) {
       case "yes":
+<<<<<<< HEAD
         responder.acceptDispatch(firstLine[1].toUpperCase(), true, callback);
         break;
       case "no":
         responder.acceptDispatch(firstLine[1].toUpperCase(), false, callback);
+=======
+        responder.acceptDispatch(firstLine[1].toUpperCase(),true,callback);
+        break;
+      case "no":
+        responder.acceptDispatch(firstLine[1].toUpperCase(),false,callback);
+>>>>>>> aae651f215d7728844fb18e0b36d2f6d2ac52fb4
         break;
       default:
         callback(false, "Request not found.", 404);
@@ -121,8 +154,12 @@ function smsHandler(response, body, phoneNumber) {
         callback(false, "Invalid request.", 400);
         return;
       }
+<<<<<<< HEAD
       // Ending by sms is only supported on the caller side
       endEmergency(result[1], undefined, reasonCaller, callback);
+=======
+      endEmergency(result[1], undefined, callback);
+>>>>>>> aae651f215d7728844fb18e0b36d2f6d2ac52fb4
       break;
 
     default:
@@ -132,7 +169,11 @@ function smsHandler(response, body, phoneNumber) {
 }
 
 function prepLatLng(deviceID, latLng, phoneNumber, isSMS, callback) {
+<<<<<<< HEAD
   if (!deviceID || !latLng || !phoneNumber) {
+=======
+  if (!deviceID || !latLng || (!phoneNumber && isSMS)) {
+>>>>>>> aae651f215d7728844fb18e0b36d2f6d2ac52fb4
     callback(false, "Invalid request.", 400);
     return false;
   }
@@ -142,12 +183,20 @@ function prepLatLng(deviceID, latLng, phoneNumber, isSMS, callback) {
     emergencyID = idGen.makeByDevice(deviceID);
     idGen.setStageByEmergency(emergencyID, stageLatLng);
   } catch (e) {
+<<<<<<< HEAD
     console.error(e);
+=======
+    console.log(e);
+>>>>>>> aae651f215d7728844fb18e0b36d2f6d2ac52fb4
     callback(false, "Internal server error.", 500);
     return false;
   }
 
+<<<<<<< HEAD
   responder.prepareDispatch(emergencyID, phoneNumber, isSMS);
+=======
+  responder.prepareDispatch(emergencyID,phoneNumber,isSMS);
+>>>>>>> aae651f215d7728844fb18e0b36d2f6d2ac52fb4
   responder.handleLatLng(emergencyID, latLng, callback);
 
   // As mentioned above, just change expiration time to -1 to never expire emergencies
@@ -156,7 +205,11 @@ function prepLatLng(deviceID, latLng, phoneNumber, isSMS, callback) {
     return true;
   }
   setTimeout(function() {
+<<<<<<< HEAD
     endEmergency(deviceID, emergencyID, phoneNumber, reasonExpired, function(s, t, c) {
+=======
+    endByEmergency(emergencyID, function(s, t, c) {
+>>>>>>> aae651f215d7728844fb18e0b36d2f6d2ac52fb4
       console.log("Emergency " + emergencyID + " timed out.");
       console.log("Result of timeout was: ", s, t, c);
     });
@@ -180,7 +233,11 @@ function prepAddress(deviceID, zipcode, rawAddress, callback) {
   try {
     idGen.setStageByEmergency(emergencyID, stageAddress);
   } catch (e) {
+<<<<<<< HEAD
     console.error(e);
+=======
+    console.log(e);
+>>>>>>> aae651f215d7728844fb18e0b36d2f6d2ac52fb4
     callback(false, "Internal server error.", 500);
     return;
   }
@@ -189,7 +246,11 @@ function prepAddress(deviceID, zipcode, rawAddress, callback) {
 
 }
 
+<<<<<<< HEAD
 function getDispatch(deviceID, response, callback) {
+=======
+function getDispatch(deviceID,response,callback) {
+>>>>>>> aae651f215d7728844fb18e0b36d2f6d2ac52fb4
   if (!deviceID) {
     callback(false, "Invalid request.", 400);
     return;
@@ -227,7 +288,11 @@ function fetchAddress(deviceID, emergencyID, response, callback) {
   response.end(json);
 }
 
+<<<<<<< HEAD
 function endEmergency(deviceID, emergencyID, reason, callback) {
+=======
+function endEmergency(deviceID, emergencyID, callback) {
+>>>>>>> aae651f215d7728844fb18e0b36d2f6d2ac52fb4
   if (!deviceID && !emergencyID) {
     callback(false, "Invalid request.", 400);
     return;
@@ -241,6 +306,7 @@ function endEmergency(deviceID, emergencyID, reason, callback) {
       return;
     }
   }
+<<<<<<< HEAD
   wasDispatcher = reason == reasonDispatcher;
   if (!wasDispatcher) {
     // We need to suffix the reason we send to dispatcher with the emergency ID.
@@ -255,6 +321,19 @@ function endEmergency(deviceID, emergencyID, reason, callback) {
     callback(false, "Internal server error.", 500);
     return;
   }
+=======
+
+  try {
+    idGen.endByEmergency(emergencyID);
+    responder.expireLocation(emergencyID);
+  } catch (e) {
+    console.log(e);
+    callback(false, "Internal server error.", 500);
+    return;
+  }
+
+  callback(true, "Success.", 200);
+>>>>>>> aae651f215d7728844fb18e0b36d2f6d2ac52fb4
 }
 
 function tryGetEmergencyID(deviceID, callback) {
@@ -262,7 +341,11 @@ function tryGetEmergencyID(deviceID, callback) {
   try {
     emergencyID = idGen.getEmergencyByDevice(deviceID);
   } catch (e) {
+<<<<<<< HEAD
     console.error(e);
+=======
+    console.log(e);
+>>>>>>> aae651f215d7728844fb18e0b36d2f6d2ac52fb4
     callback(false, "Could not find emergency.", 404);
   }
   return emergencyID;
@@ -274,7 +357,11 @@ function callbackCreator(response, isSMS) {
   if (isSMS) {
     callback = (success, text, code) => {
       if (called) {
+<<<<<<< HEAD
         console.error("Calling callback more than once");
+=======
+        console.log("Calling callback more than once");
+>>>>>>> aae651f215d7728844fb18e0b36d2f6d2ac52fb4
         return;
       }
       called = true;
@@ -289,7 +376,11 @@ function callbackCreator(response, isSMS) {
   } else {
     callback = (success, text, code) => {
       if (called) {
+<<<<<<< HEAD
         console.error("Calling callback more than once");
+=======
+        console.log("Calling callback more than once");
+>>>>>>> aae651f215d7728844fb18e0b36d2f6d2ac52fb4
         return;
       }
       called = true;
@@ -297,8 +388,12 @@ function callbackCreator(response, isSMS) {
       if (!success) {
         response.writeHead(code, text, {
           'Content-Length': Buffer.byteLength(text),
+<<<<<<< HEAD
           'Content-Type': 'text/plain'
         });
+=======
+          'Content-Type': 'text/plain' });
+>>>>>>> aae651f215d7728844fb18e0b36d2f6d2ac52fb4
       }
       response.end(text);
     }
