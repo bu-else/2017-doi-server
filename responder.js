@@ -153,8 +153,6 @@ function expireLocation(emergencyID,wasDispatcher,reason,callback) {
     reciever = process.env.BEN_NUMBER;
   }
 
-  console.log(wasDispatcher,reason,reciever);
-
   twilioClient.messages.create({
     from: process.env.TWILIO_NUMBER,
     to: reciever,
