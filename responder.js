@@ -85,7 +85,7 @@ function prepareDispatch(emergencyID, phoneNumber, isSMS) {
   if (isSMS) {
     callback = (canHandle) => {
       if (called) {
-        console.log("Calling callback twice.");
+        console.error("Calling callback more than once.");
         return;
       }
 
@@ -97,12 +97,12 @@ function prepareDispatch(emergencyID, phoneNumber, isSMS) {
         from: process.env.TWILIO_NUMBER,
         to: phoneNumber,
         body: canHandle ? handledText : failedText
-      }).catch((messsage) => console.log("Unable to respond to the caller."));
+      }).catch((messsage) => console.error("Unable to respond to the caller."));
     }
   } else {
     callback = (canHandle) => {
       if (called) {
-        console.log("Calling callback twice.");
+        console.error("Calling callback more than once.");
         return;
       }
 
@@ -153,7 +153,7 @@ function expireLocation(emergencyID,wasDispatcher,reason,callback) {
   .catch((messsage) => callback(false, "Internal server error.", 500));
 
   delete emergencyToCallback[emergencyID];
-  emergencyToDispatch[emergencyToDispatch] = ended;
+  emergencyToDispatch[emergencyToDispatch] = dispatchEnded;
   delete emergencyToAddress[emergencyID];
   delete emergencyToPhoneNumber[emergencyID];
   delete emergencyToLatLng[emergencyID];
