@@ -33,7 +33,7 @@ const requestHandler = (request, response) => {
 
   switch (result[1]) {
     case "latlng":
-      success = prepLatLng(URL_GET["deviceID"], URL_GET["LatLng"], undefined, false, callback);
+      success = prepLatLng(URL_GET["deviceID"], URL_GET["LatLng"], URL_GET["From"], false, callback);
       break;
 
     case "address":
@@ -45,7 +45,7 @@ const requestHandler = (request, response) => {
       break;
 
     case "dispatch":
-      getDispatch(URL_GET["deviceID"],response,callback);
+      getDispatch(URL_GET["deviceID"], response, callback);
       break;
 
     case "fetch":
@@ -70,16 +70,16 @@ function smsHandler(response, body, phoneNumber) {
   const firstLine = result[0].split("+");
   if (strip(phoneNumber) == strip(process.env.BEN_NUMBER) && firstLine.length >= 2) {
     if (firstLine.length != 3) {
-        callback(false, "Invalid request.", 400);
-        return;
+      callback(false, "Invalid request.", 400);
+      return;
     }
 
     switch (firstLine[0].toLowerCase()) {
       case "yes":
-        responder.acceptDispatch(firstLine[1].toUpperCase(),true,callback);
+        responder.acceptDispatch(firstLine[1].toUpperCase(), true, callback);
         break;
       case "no":
-        responder.acceptDispatch(firstLine[1].toUpperCase(),false,callback);
+        responder.acceptDispatch(firstLine[1].toUpperCase(), false, callback);
         break;
       default:
         callback(false, "Request not found.", 404);
@@ -120,7 +120,7 @@ function smsHandler(response, body, phoneNumber) {
 }
 
 function prepLatLng(deviceID, latLng, phoneNumber, isSMS, callback) {
-  if (!deviceID || !latLng || (!phoneNumber && isSMS)) {
+  if (!deviceID || !latLng || !phoneNumber) {
     callback(false, "Invalid request.", 400);
     return false;
   }
@@ -135,7 +135,7 @@ function prepLatLng(deviceID, latLng, phoneNumber, isSMS, callback) {
     return false;
   }
 
-  responder.prepareDispatch(emergencyID,phoneNumber,isSMS);
+  responder.prepareDispatch(emergencyID, phoneNumber, isSMS);
   responder.handleLatLng(emergencyID, latLng, callback);
 
   // As mentioned above, just change expiration time to -1 to never expire emergencies
@@ -177,7 +177,7 @@ function prepAddress(deviceID, zipcode, rawAddress, callback) {
 
 }
 
-function getDispatch(deviceID,response,callback) {
+function getDispatch(deviceID, response, callback) {
   if (!deviceID) {
     callback(false, "Invalid request.", 400);
     return;
@@ -282,7 +282,8 @@ function callbackCreator(response, isSMS) {
       if (!success) {
         response.writeHead(code, text, {
           'Content-Length': Buffer.byteLength(text),
-          'Content-Type': 'text/plain' });
+          'Content-Type': 'text/plain'
+        });
       }
       response.end(text);
     }
