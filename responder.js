@@ -71,7 +71,7 @@ function handleAddress(emergencyID, address, zipcode, callback) {
       from: process.env.TWILIO_NUMBER,
       to: process.env.BEN_NUMBER,
       body: "Emergency " + emergencyID + " has recieved an updated address: " + address + ". Zipcode: " + zipcode +
-        ". " + doNotReply;
+        ". " + doNotReply
     }).then((messsage) => callback(true, "Success.", 200))
     .catch((messsage) => callback(false, "Internal server error.", 500));
 }
@@ -147,7 +147,7 @@ function expireLocation(emergencyID,wasDispatcher,reason,callback) {
   twilioClient.messages.create({
     from: process.env.TWILIO_NUMBER,
     to: reciever,
-    body: reason + doNotReply;
+    body: reason + doNotReply
   }).then((messsage) => callback(true, "Success.", 200))
   .catch((messsage) => callback(false, "Internal server error.", 500));
 
