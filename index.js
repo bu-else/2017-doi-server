@@ -275,7 +275,7 @@ function callbackCreator(response, isSMS) {
   if (isSMS) {
     callback = (success, text, code) => {
       if (called) {
-        console.log("Calling callback more than once");
+        console.error("Calling callback more than once");
         return;
       }
       called = true;
@@ -290,7 +290,7 @@ function callbackCreator(response, isSMS) {
   } else {
     callback = (success, text, code) => {
       if (called) {
-        console.log("Calling callback more than once");
+        console.error("Calling callback more than once");
         return;
       }
       called = true;
