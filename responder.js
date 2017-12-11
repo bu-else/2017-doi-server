@@ -120,6 +120,7 @@ function acceptDispatch(emergencyID,canHandle,callback) {
     callback(false, "Emergency not found.", 500);
   }
   emergencyToCallback[emergencyID](canHandle);
+  console.log("ACCEPTING THE DISPATCH");
   if (!canHandle) {
     expireLocation(emergencyID,true,rejectedMessage,callback);
     emergencyToDispatch[emergencyID] = dispatchRejected;
