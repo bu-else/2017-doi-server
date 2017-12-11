@@ -153,12 +153,14 @@ function expireLocation(emergencyID,wasDispatcher,reason,callback) {
     reciever = process.env.BEN_NUMBER;
   }
 
+  console.log(wasDispatcher,reason,reciever);
+
   twilioClient.messages.create({
     from: process.env.TWILIO_NUMBER,
     to: reciever,
     body: reason + doNotReply
   }).then((messsage) => callback(true, "Success.", 200))
-  .catch((messsage) => {console.error(message); callback(false, "TWILLIO ERROR", 500)});
+  .catch((messsage) => {console.error(message); callback(false, "Internal server error.", 500)});
 
   delete emergencyToCallback[emergencyID];
   emergencyToDispatch[emergencyToDispatch] = dispatchEnded;
