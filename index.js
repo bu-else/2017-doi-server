@@ -5,6 +5,7 @@ const responder = require("./responder.js");
 const idGen = require("./idgenerator.js");
 const uuidv4 = require('uuid/v4');
 const Dotenv = require('dotenv');
+
 Dotenv.config({
   silent: true
 });
@@ -16,6 +17,9 @@ const stageAddress = 2;
 // Otherwise, a good value is ten minutes
 const minute = 60 * 1000;
 const expirationTime = -1;
+const reasonExpired = "expired."
+const reasonDispatcher = "was ended successfully by the dispatcher."
+const reasonCaller = "was ended successfully by its caller.";
 
 const requestHandler = (request, response) => {
   if (request.url.toString() == "/") {
@@ -41,7 +45,13 @@ const requestHandler = (request, response) => {
       break;
 
     case "end":
-      endEmergency(URL_GET["deviceID"], URL_GET["emergencyID"], callback);
+      var reason;
+      if (URL_GET["deviceID"]) {
+        reason = reasonCaller;
+      } else {
+        reason = reasonDispatcher;
+      }
+      endEmergency(URL_GET["deviceID"], URL_GET["emergencyID"], reason, callback);
       break;
 
     case "dispatch":
@@ -110,7 +120,8 @@ function smsHandler(response, body, phoneNumber) {
         callback(false, "Invalid request.", 400);
         return;
       }
-      endEmergency(result[1], undefined, callback);
+      // Ending by sms is only supported on the caller side
+      endEmergency(result[1], undefined, reasonCaller, callback);
       break;
 
     default:
@@ -144,7 +155,7 @@ function prepLatLng(deviceID, latLng, phoneNumber, isSMS, callback) {
     return true;
   }
   setTimeout(function() {
-    endByEmergency(emergencyID, function(s, t, c) {
+    endEmergency(deviceID, emergencyID, phoneNumber, reasonExpired, function(s, t, c) {
       console.log("Emergency " + emergencyID + " timed out.");
       console.log("Result of timeout was: ", s, t, c);
     });
@@ -215,11 +226,12 @@ function fetchAddress(deviceID, emergencyID, response, callback) {
   response.end(json);
 }
 
-function endEmergency(deviceID, emergencyID, callback) {
+function endEmergency(deviceID, emergencyID, reason, callback) {
   if (!deviceID && !emergencyID) {
     callback(false, "Invalid request.", 400);
     return;
   }
+
 
   if (!emergencyID) {
     emergencyID = tryGetEmergencyID(deviceID, callback);
@@ -230,16 +242,16 @@ function endEmergency(deviceID, emergencyID, callback) {
     }
   }
 
+  wasDispatcher = reason == reasonDispatcher;
+
   try {
     idGen.endByEmergency(emergencyID);
-    responder.expireLocation(emergencyID);
+    responder.expireLocation(emergencyID,wasDispatcher,reason,callback);
   } catch (e) {
     console.log(e);
     callback(false, "Internal server error.", 500);
     return;
   }
-
-  callback(true, "Success.", 200);
 }
 
 function tryGetEmergencyID(deviceID, callback) {
