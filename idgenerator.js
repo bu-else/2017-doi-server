@@ -24,12 +24,8 @@ function makeByDevice(deviceID) {
     return testID;
   }
 
-<<<<<<< HEAD
-  emergencyID = deviceToEmergency[deviceID;]
-  if (emergencyID&&emergencyToDevice[emergencyID]) {
-=======
-  if (deviceToEmergency[deviceID]) {
->>>>>>> aae651f215d7728844fb18e0b36d2f6d2ac52fb4
+  emergencyID = deviceToEmergency[deviceID];
+  if (emergencyID && emergencyToDevice[emergencyID]) {
     throw "Device already has an emergency";
   }
 

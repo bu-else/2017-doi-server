@@ -12,8 +12,6 @@ const twilioClient = require('twilio')(
   process.env.TWILIO_TOKEN
 );
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 const doNotReply = "\nThis is an anonymous, machine generated text. Please do not reply."
 
 const dispatchPending = "Pending";
@@ -22,21 +20,6 @@ const dispatchRejected = "Rejected";
 const dispatchEnded = "Ended";
 
 const rejectedMessage = "The dispatcher is unable to respond to your request. Please call 911!" 
-=======
-const dispatchPending = "Pending";
-const dispatchAccepted = "Accepted";
-const dispatchRejected = "Rejected";
->>>>>>> aae651f215d7728844fb18e0b36d2f6d2ac52fb4
-=======
-const doNotReply = "\nThis is an anonymous, machine generated text. Please do not reply."
-
-const dispatchPending = "Pending";
-const dispatchAccepted = "Accepted";
-const dispatchRejected = "Rejected";
-const dispatchEnded = "Ended";
-
-const rejectedMessage = "The dispatcher is unable to respond to your request. Please call 911!" 
->>>>>>> e37d356588d192cc5fd657dfda09c3046fb4291a
 var emergencyToDispatch = {};
 
 var emergencyToAddress = {};
@@ -44,14 +27,7 @@ var emergencyToLatLng = {};
 // Note that expires is done on the device so that there is no danger of the server being unable
 // to send a rejection in time.
 var emergencyToCallback = {};
-<<<<<<< HEAD
-<<<<<<< HEAD
 var emergencyToPhoneNumber = {};
-=======
->>>>>>> aae651f215d7728844fb18e0b36d2f6d2ac52fb4
-=======
-var emergencyToPhoneNumber = {};
->>>>>>> e37d356588d192cc5fd657dfda09c3046fb4291a
 
 function handleLatLng(emergencyID, latLng, callback) {
   mapsClient.reverseGeocode({
@@ -98,15 +74,7 @@ function handleAddress(emergencyID, address, zipcode, callback) {
       from: process.env.TWILIO_NUMBER,
       to: process.env.BEN_NUMBER,
       body: "Emergency " + emergencyID + " has recieved an updated address: " + address + ". Zipcode: " + zipcode +
-<<<<<<< HEAD
-<<<<<<< HEAD
         "." + doNotReply
-=======
-        ". This is an anonymous, machine generated text. Please do not reply."
->>>>>>> aae651f215d7728844fb18e0b36d2f6d2ac52fb4
-=======
-        "." + doNotReply
->>>>>>> e37d356588d192cc5fd657dfda09c3046fb4291a
     }).then((messsage) => callback(true, "Success.", 200))
     .catch((messsage) => callback(false, "Internal server error.", 500));
 }
@@ -115,8 +83,6 @@ function prepareDispatch(emergencyID, phoneNumber, isSMS) {
   var called = false;
   var callback;
   emergencyToDispatch[emergencyID] = dispatchPending;
-<<<<<<< HEAD
-<<<<<<< HEAD
   emergencyToPhoneNumber[emergencyID] = phoneNumber
   if (isSMS) {
     callback = (canHandle) => {
@@ -127,53 +93,18 @@ function prepareDispatch(emergencyID, phoneNumber, isSMS) {
 
       const handledText = "Help is on the way!" + doNotReply;
       const failedText = rejectedMessage + doNotReply;
-=======
-=======
-  emergencyToPhoneNumber[emergencyID] = phoneNumber
->>>>>>> e37d356588d192cc5fd657dfda09c3046fb4291a
-  if (isSMS) {
-    callback = (canHandle) => {
-      if (called) {
-        console.error("Calling callback more than once.");
-        return;
-      }
-
-<<<<<<< HEAD
-      const handledText = "Help is on the way!";
-      const failedText = "The dispatcher is unable to respond to your request. Please call 911!"
->>>>>>> aae651f215d7728844fb18e0b36d2f6d2ac52fb4
-=======
-      const handledText = "Help is on the way!" + doNotReply;
-      const failedText = rejectedMessage + doNotReply;
->>>>>>> e37d356588d192cc5fd657dfda09c3046fb4291a
       emergencyToDispatch[emergencyID] = canHandle ? dispatchAccepted : dispatchRejected;
 
       twilioClient.messages.create({
         from: process.env.TWILIO_NUMBER,
         to: phoneNumber,
         body: canHandle ? handledText : failedText
-<<<<<<< HEAD
-<<<<<<< HEAD
       }).catch((messsage) => console.error("Unable to respond to the caller."));
-=======
-      }).catch((messsage) => console.log("Unable to respond to the caller."));
->>>>>>> aae651f215d7728844fb18e0b36d2f6d2ac52fb4
-=======
-      }).catch((messsage) => console.error("Unable to respond to the caller."));
->>>>>>> e37d356588d192cc5fd657dfda09c3046fb4291a
     }
   } else {
     callback = (canHandle) => {
       if (called) {
-<<<<<<< HEAD
-<<<<<<< HEAD
         console.error("Calling callback more than once.");
-=======
-        console.log("Calling callback twice.");
->>>>>>> aae651f215d7728844fb18e0b36d2f6d2ac52fb4
-=======
-        console.error("Calling callback more than once.");
->>>>>>> e37d356588d192cc5fd657dfda09c3046fb4291a
         return;
       }
 
@@ -185,8 +116,6 @@ function prepareDispatch(emergencyID, phoneNumber, isSMS) {
 
 function acceptDispatch(emergencyID,canHandle,callback) {
   if (!emergencyToCallback.hasOwnProperty(emergencyID)) {
-<<<<<<< HEAD
-<<<<<<< HEAD
     console.error("Trying to access non-existant key:",emergencyID,"in dictionary",emergencyToCallback);
     callback(false, "Emergency not found.", 500);
   }
@@ -197,39 +126,13 @@ function acceptDispatch(emergencyID,canHandle,callback) {
   } else {
     callback(true,"Success.",200);
   }
-=======
-    console.log("Trying to access non-existant key:",emergencyID,"in dictionary",emergencyToCallback);
-    callback(false, "Emergency not found.", 500);
-  }
-  emergencyToCallback[emergencyID](canHandle);
-  callback(true,"Success.",200);
->>>>>>> aae651f215d7728844fb18e0b36d2f6d2ac52fb4
-=======
-    console.error("Trying to access non-existant key:",emergencyID,"in dictionary",emergencyToCallback);
-    callback(false, "Emergency not found.", 500);
-  }
-  emergencyToCallback[emergencyID](canHandle);
-  if (!canHandle) {
-    expireLocation(emergencyID,true,rejectedMessage,callback);
-    emergencyToDispatch[emergencyID] = dispatchRejected;
-  } else {
-    callback(true,"Success.",200);
-  }
->>>>>>> e37d356588d192cc5fd657dfda09c3046fb4291a
 }
 
 function getDispatchStatus(emergencyID) {
   return emergencyToDispatch[emergencyID];
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 
-=======
->>>>>>> aae651f215d7728844fb18e0b36d2f6d2ac52fb4
-=======
-
->>>>>>> e37d356588d192cc5fd657dfda09c3046fb4291a
 function getLocationJSON(emergencyID) {
   const address = emergencyToAddress[emergencyID];
   const latLng = emergencyToLatLng[emergencyID];
@@ -242,10 +145,6 @@ function getLocationJSON(emergencyID) {
   })
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> e37d356588d192cc5fd657dfda09c3046fb4291a
 function expireLocation(emergencyID,wasDispatcher,reason,callback) {
   var reciever;
   if (wasDispatcher) {
@@ -263,17 +162,8 @@ function expireLocation(emergencyID,wasDispatcher,reason,callback) {
 
   delete emergencyToCallback[emergencyID];
   emergencyToDispatch[emergencyToDispatch] = dispatchEnded;
-<<<<<<< HEAD
   delete emergencyToAddress[emergencyID];
   delete emergencyToPhoneNumber[emergencyID];
-=======
-function expireLocation(emergencyID) {
-  delete emergencyToAddress[emergencyID];
->>>>>>> aae651f215d7728844fb18e0b36d2f6d2ac52fb4
-=======
-  delete emergencyToAddress[emergencyID];
-  delete emergencyToPhoneNumber[emergencyID];
->>>>>>> e37d356588d192cc5fd657dfda09c3046fb4291a
   delete emergencyToLatLng[emergencyID];
 }
 
