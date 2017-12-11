@@ -12,7 +12,7 @@ const twilioClient = require('twilio')(
   process.env.TWILIO_TOKEN
 );
 
-const doNotReply = "This is an anonymous, machine generated text. Please do not reply."
+const doNotReply = "\nThis is an anonymous, machine generated text. Please do not reply."
 
 const dispatchPending = "Pending";
 const dispatchAccepted = "Accepted";
@@ -71,7 +71,7 @@ function handleAddress(emergencyID, address, zipcode, callback) {
       from: process.env.TWILIO_NUMBER,
       to: process.env.BEN_NUMBER,
       body: "Emergency " + emergencyID + " has recieved an updated address: " + address + ". Zipcode: " + zipcode +
-        ". " + doNotReply
+        "." + doNotReply
     }).then((messsage) => callback(true, "Success.", 200))
     .catch((messsage) => callback(false, "Internal server error.", 500));
 }
@@ -88,8 +88,8 @@ function prepareDispatch(emergencyID, phoneNumber, isSMS) {
         return;
       }
 
-      const handledText = "Help is on the way! " + doNotReply;
-      const failedText = "The dispatcher is unable to respond to your request. Please call 911! " + doNotReply;
+      const handledText = "Help is on the way!" + doNotReply;
+      const failedText = "The dispatcher is unable to respond to your request. Please call 911!" + doNotReply;
       emergencyToDispatch[emergencyID] = canHandle ? dispatchAccepted : dispatchRejected;
 
       twilioClient.messages.create({
