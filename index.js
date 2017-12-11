@@ -12,6 +12,7 @@ Dotenv.config({
 
 const stageLatLng = 1;
 const stageAddress = 2;
+const stageEnded = -1;
 
 // If expirationTime is set to -1, requests will never expire
 // Otherwise, a good value is ten minutes
