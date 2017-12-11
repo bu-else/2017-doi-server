@@ -116,11 +116,10 @@ function prepareDispatch(emergencyID, phoneNumber, isSMS) {
 
 function acceptDispatch(emergencyID,canHandle,callback) {
   if (!emergencyToCallback.hasOwnProperty(emergencyID)) {
-    console.log("Trying to access non-existant key:",emergencyID,"in dictionary",emergencyToCallback);
+    console.error("Trying to access non-existant key:",emergencyID,"in dictionary",emergencyToCallback);
     callback(false, "Emergency not found.", 500);
   }
   emergencyToCallback[emergencyID](canHandle);
-  console.log("ACCEPTING THE DISPATCH");
   if (!canHandle) {
     expireLocation(emergencyID,true,rejectedMessage,callback);
     emergencyToDispatch[emergencyID] = dispatchRejected;

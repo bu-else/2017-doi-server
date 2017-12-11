@@ -141,7 +141,7 @@ function prepLatLng(deviceID, latLng, phoneNumber, isSMS, callback) {
     emergencyID = idGen.makeByDevice(deviceID);
     idGen.setStageByEmergency(emergencyID, stageLatLng);
   } catch (e) {
-    console.log(e);
+    console.error(e);
     callback(false, "Internal server error.", 500);
     return false;
   }
@@ -179,7 +179,7 @@ function prepAddress(deviceID, zipcode, rawAddress, callback) {
   try {
     idGen.setStageByEmergency(emergencyID, stageAddress);
   } catch (e) {
-    console.log(e);
+    console.error(e);
     callback(false, "Internal server error.", 500);
     return;
   }
@@ -232,7 +232,6 @@ function endEmergency(deviceID, emergencyID, reason, callback) {
     return;
   }
 
-
   if (!emergencyID) {
     emergencyID = tryGetEmergencyID(deviceID, callback);
     if (!emergencyID) {
@@ -241,7 +240,6 @@ function endEmergency(deviceID, emergencyID, reason, callback) {
       return;
     }
   }
-
   wasDispatcher = reason == reasonDispatcher;
   if (!wasDispatcher) {
     // We need to suffix the reason we send to dispatcher with the emergency ID.
@@ -252,8 +250,8 @@ function endEmergency(deviceID, emergencyID, reason, callback) {
     idGen.endByEmergency(emergencyID);
     responder.expireLocation(emergencyID,wasDispatcher,reason,callback);
   } catch (e) {
-    console.log(e);
-    callback(false, "Internal server error.", 500);
+    console.error(e);
+    callback(false, "THIS IS GETTING CALLED", 500); // Internal server error.
     return;
   }
 }
@@ -263,7 +261,7 @@ function tryGetEmergencyID(deviceID, callback) {
   try {
     emergencyID = idGen.getEmergencyByDevice(deviceID);
   } catch (e) {
-    console.log(e);
+    console.error(e);
     callback(false, "Could not find emergency.", 404);
   }
   return emergencyID;
