@@ -12,6 +12,8 @@ const twilioClient = require('twilio')(
   process.env.TWILIO_TOKEN
 );
 
+const doNotReply = "This is an anonymous, machine generated text. Please do not reply."
+
 const dispatchPending = "Pending";
 const dispatchAccepted = "Accepted";
 const dispatchRejected = "Rejected";
@@ -69,7 +71,7 @@ function handleAddress(emergencyID, address, zipcode, callback) {
       from: process.env.TWILIO_NUMBER,
       to: process.env.BEN_NUMBER,
       body: "Emergency " + emergencyID + " has recieved an updated address: " + address + ". Zipcode: " + zipcode +
-        ". This is an anonymous, machine generated text. Please do not reply."
+        ". " + doNotReply;
     }).then((messsage) => callback(true, "Success.", 200))
     .catch((messsage) => callback(false, "Internal server error.", 500));
 }
@@ -86,8 +88,8 @@ function prepareDispatch(emergencyID, phoneNumber, isSMS) {
         return;
       }
 
-      const handledText = "Help is on the way!";
-      const failedText = "The dispatcher is unable to respond to your request. Please call 911!"
+      const handledText = "Help is on the way! " + doNotReply;
+      const failedText = "The dispatcher is unable to respond to your request. Please call 911! " + doNotReply;
       emergencyToDispatch[emergencyID] = canHandle ? dispatchAccepted : dispatchRejected;
 
       twilioClient.messages.create({
@@ -134,7 +136,21 @@ function getLocationJSON(emergencyID) {
   })
 }
 
-function expireLocation(emergencyID) {
+function expireLocation(emergencyID,wasDispatcher,reason,callback) {
+  var reciever;
+  if (wasDispatcher) {
+    reciever = emergencyToPhoneNumber[emergencyID];
+  } else {
+    reciever = process.env.BEN_NUMBER;
+  }
+
+  twilioClient.messages.create({
+    from: process.env.TWILIO_NUMBER,
+    to: reciever,
+    body: "Emergency " + emergencyID + " " + reason + ". " + doNotReply;
+  }).then((messsage) => callback(true, "Success.", 200))
+  .catch((messsage) => callback(false, "Internal server error.", 500));
+
   delete emergencyToCallback[emergencyID];
   delete emergencyToDispatch[emergencyToDispatch];
   delete emergencyToAddress[emergencyID];
