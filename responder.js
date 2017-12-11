@@ -22,6 +22,7 @@ var emergencyToLatLng = {};
 // Note that expires is done on the device so that there is no danger of the server being unable
 // to send a rejection in time.
 var emergencyToCallback = {};
+var emergencyToPhoneNumber = {};
 
 function handleLatLng(emergencyID, latLng, callback) {
   mapsClient.reverseGeocode({
@@ -77,6 +78,7 @@ function prepareDispatch(emergencyID, phoneNumber, isSMS) {
   var called = false;
   var callback;
   emergencyToDispatch[emergencyID] = dispatchPending;
+  emergencyToPhoneNumber[emergencyID] = phoneNumber
   if (isSMS) {
     callback = (canHandle) => {
       if (called) {
@@ -133,7 +135,10 @@ function getLocationJSON(emergencyID) {
 }
 
 function expireLocation(emergencyID) {
+  delete emergencyToCallback[emergencyID];
+  delete emergencyToDispatch[emergencyToDispatch];
   delete emergencyToAddress[emergencyID];
+  delete emergencyToPhoneNumber[emergencyID];
   delete emergencyToLatLng[emergencyID];
 }
 
