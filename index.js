@@ -18,7 +18,7 @@ const stageAddress = 2;
 const minute = 60 * 1000;
 const expirationTime = -1;
 const reasonExpired = "expired."
-const reasonDispatcher = "was ended successfully by the dispatcher."
+const reasonDispatcher = "Your emergency was successfully handled by the dispatcher."
 const reasonCaller = "was ended successfully by its caller.";
 
 const requestHandler = (request, response) => {
@@ -243,6 +243,10 @@ function endEmergency(deviceID, emergencyID, reason, callback) {
   }
 
   wasDispatcher = reason == reasonDispatcher;
+  if (!wasDispatcher) {
+    // We need to suffix the reason we send to dispatcher with the emergency ID.
+    reason = "Emergency " + emergencyID + " " + reason;
+  }
 
   try {
     idGen.endByEmergency(emergencyID);

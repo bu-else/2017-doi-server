@@ -147,7 +147,7 @@ function expireLocation(emergencyID,wasDispatcher,reason,callback) {
   twilioClient.messages.create({
     from: process.env.TWILIO_NUMBER,
     to: reciever,
-    body: "Emergency " + emergencyID + " " + reason + ". " + doNotReply;
+    body: reason + doNotReply;
   }).then((messsage) => callback(true, "Success.", 200))
   .catch((messsage) => callback(false, "Internal server error.", 500));
 
