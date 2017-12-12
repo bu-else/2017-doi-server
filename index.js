@@ -245,6 +245,7 @@ function endEmergency(deviceID, emergencyID, reason, callback) {
       return;
     }
   }
+  
   wasDispatcher = reason == reasonDispatcher;
   if (!wasDispatcher) {
     // We need to suffix the reason we send to dispatcher with the emergency ID.

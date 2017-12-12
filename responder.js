@@ -161,7 +161,7 @@ function expireLocation(emergencyID,wasDispatcher,reason,callback) {
   .catch((messsage) => {console.error(message); callback(false, "Internal server error.", 500)});
 
   delete emergencyToCallback[emergencyID];
-  emergencyToDispatch[emergencyToDispatch] = dispatchEnded;
+  emergencyToDispatch[emergencyID] = dispatchEnded;
   delete emergencyToAddress[emergencyID];
   delete emergencyToPhoneNumber[emergencyID];
   delete emergencyToLatLng[emergencyID];
