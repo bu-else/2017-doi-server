@@ -1,15 +1,15 @@
 const Dotenv = require('dotenv');
 Dotenv.config({
-  silent: true
+    silent: true
 });
 
 const mapsClient = require('@google/maps').createClient({
-  key: process.env.MAPS_KEY
+    key: process.env.MAPS_KEY
 });
 
 const twilioClient = require('twilio')(
-  process.env.TWILIO_SID,
-  process.env.TWILIO_TOKEN
+    process.env.TWILIO_SID,
+    process.env.TWILIO_TOKEN
 );
 
 const doNotReply = "\nThis is an anonymous, machine generated text. Please do not reply."
@@ -19,7 +19,7 @@ const dispatchAccepted = "Accepted";
 const dispatchRejected = "Rejected";
 const dispatchEnded = "Ended";
 
-const rejectedMessage = "The dispatcher is unable to respond to your request. Please call 911!" 
+const rejectedMessage = "The dispatcher is unable to respond to your request. Please call 911!"
 var emergencyToDispatch = {};
 
 var emergencyToAddress = {};
@@ -30,149 +30,151 @@ var emergencyToCallback = {};
 var emergencyToPhoneNumber = {};
 
 function handleLatLng(emergencyID, latLng, callback) {
-  mapsClient.reverseGeocode({
-      latlng: latLng,
-      result_type: ['country', 'street_address'],
-      location_type: ['ROOFTOP', 'APPROXIMATE', "RANGE_INTERPOLATED", "APPROXIMATE"],
-      language: "EN"
-    },
-    function(err, response) {
-      if (Object.keys(response.json.results).length == 0) {
-        console.log("Empty Google Maps response.");
-        callback(false, "Internal server error.", 500);
-        return;
-      }
-      if (!err) {
-        const address = response.json.results[0]["formatted_address"];
-        emergencyToAddress[emergencyID] = address;
-        emergencyToLatLng[emergencyID] = latLng;
-        twilioClient.messages.create({
-            from: process.env.TWILIO_NUMBER,
-            to: process.env.DISPATCH_NUMBER,
-            body: "This text is sent to report an opioid overdose at " + address + ". This is emergency " + emergencyID +
-              ". If you are able to handle to this emergency, please respond \"yes " +  emergencyID.toLowerCase() + "\"." +
-              " Otherwise, please respond \"no " +  emergencyID.toLowerCase() + "\" if you are unable to handle this emergency."
-          }).then((messsage) => callback(true, "Success.", 200))
-          .catch((messsage) => callback(false, "Internal server error.", 500));
-      } else {
-        console.log(err)
-        callback(false, "Internal server error.", 500);
-      }
-    }
-  )
+    mapsClient.reverseGeocode({
+            latlng: latLng,
+            result_type: ['country', 'street_address'],
+            location_type: ['ROOFTOP', 'APPROXIMATE', "RANGE_INTERPOLATED", "APPROXIMATE"],
+            language: "EN"
+        },
+        function(err, response) {
+            if (Object.keys(response.json.results).length == 0) {
+                console.log("Empty Google Maps response.");
+                callback(false, "Internal server error.", 500);
+                return;
+            }
+            if (!err) {
+                const address = response.json.results[0]["formatted_address"];
+                emergencyToAddress[emergencyID] = address;
+                emergencyToLatLng[emergencyID] = latLng;
+                twilioClient.messages.create({
+                        from: process.env.TWILIO_NUMBER,
+                        to: process.env.DISPATCH_NUMBER,
+                        body: "This text is sent to report an opioid overdose at " + address + ". This is emergency " + emergencyID +
+                            ". If you are able to handle to this emergency, please respond \"yes " + emergencyID.toLowerCase() + "\"." +
+                            " Otherwise, please respond \"no " + emergencyID.toLowerCase() + "\" if you are unable to handle this emergency."
+                    }).then((messsage) => callback(true, "Success.", 200))
+                    .catch((messsage) => callback(false, "Internal server error.", 500));
+            } else {
+                console.log(err)
+                callback(false, "Internal server error.", 500);
+            }
+        }
+    )
 }
 
 function handleAddress(emergencyID, address, zipcode, callback) {
-  // Because we are just receiving a street address and a zipcode, without a city, state or country
-  // we insert it carefully
-  oldAddress = emergencyToAddress[emergencyID];
-  formatted = oldAddress.split(",");
-  formatted[0] = address;
-  formatted[2] = formatted[2].slice(0, 4) + zipcode;
-  emergencyToAddress[emergencyID] = formatted.join()
-  twilioClient.messages.create({
-      from: process.env.TWILIO_NUMBER,
-      to: process.env.DISPATCH_NUMBER,
-      body: "Emergency " + emergencyID + " has recieved an updated address: " + address + ". Zipcode: " + zipcode +
-        "." + doNotReply
-    }).then((messsage) => callback(true, "Success.", 200))
-    .catch((messsage) => callback(false, "Internal server error.", 500));
+    // Because we are just receiving a street address and a zipcode, without a city, state or country
+    // we insert it carefully
+    oldAddress = emergencyToAddress[emergencyID];
+    formatted = oldAddress.split(",");
+    formatted[0] = address;
+    formatted[2] = formatted[2].slice(0, 4) + zipcode;
+    emergencyToAddress[emergencyID] = formatted.join()
+    twilioClient.messages.create({
+            from: process.env.TWILIO_NUMBER,
+            to: process.env.DISPATCH_NUMBER,
+            body: "Emergency " + emergencyID + " has recieved an updated address: " + address + ". Zipcode: " + zipcode +
+                "." + doNotReply
+        }).then((messsage) => callback(true, "Success.", 200))
+        .catch((messsage) => callback(false, "Internal server error.", 500));
 }
 
 function prepareDispatch(emergencyID, phoneNumber, isSMS) {
-  var called = false;
-  var callback;
-  emergencyToDispatch[emergencyID] = dispatchPending;
-  emergencyToPhoneNumber[emergencyID] = phoneNumber
-  if (isSMS) {
-    callback = (canHandle) => {
-      if (called) {
-        console.error("Calling callback more than once.");
-        return;
-      }
+    var called = false;
+    var callback;
+    emergencyToDispatch[emergencyID] = dispatchPending;
+    emergencyToPhoneNumber[emergencyID] = phoneNumber
+    if (isSMS) {
+        callback = (canHandle) => {
+            if (called) {
+                console.error("Calling callback more than once.");
+                return;
+            }
 
-      const handledText = "Help is on the way!" + doNotReply;
-      const failedText = rejectedMessage + doNotReply;
-      emergencyToDispatch[emergencyID] = canHandle ? dispatchAccepted : dispatchRejected;
+            const handledText = "Help is on the way!" + doNotReply;
+            const failedText = rejectedMessage + doNotReply;
+            emergencyToDispatch[emergencyID] = canHandle ? dispatchAccepted : dispatchRejected;
 
-      twilioClient.messages.create({
-        from: process.env.TWILIO_NUMBER,
-        to: phoneNumber,
-        body: canHandle ? handledText : failedText
-      }).catch((messsage) => console.error("Unable to respond to the caller."));
+            twilioClient.messages.create({
+                from: process.env.TWILIO_NUMBER,
+                to: phoneNumber,
+                body: canHandle ? handledText : failedText
+            }).catch((messsage) => console.error("Unable to respond to the caller."));
+        }
+    } else {
+        callback = (canHandle) => {
+            if (called) {
+                console.error("Calling callback more than once.");
+                return;
+            }
+
+            emergencyToDispatch[emergencyID] = canHandle ? dispatchAccepted : dispatchRejected;
+        }
     }
-  } else {
-    callback = (canHandle) => {
-      if (called) {
-        console.error("Calling callback more than once.");
-        return;
-      }
-
-      emergencyToDispatch[emergencyID] = canHandle ? dispatchAccepted : dispatchRejected;
-    }
-  }
-  emergencyToCallback[emergencyID] = callback;
+    emergencyToCallback[emergencyID] = callback;
 }
 
-function acceptDispatch(emergencyID,canHandle,callback) {
-  if (!emergencyToCallback.hasOwnProperty(emergencyID)) {
-    console.error("Trying to access non-existant key:",emergencyID,"in dictionary",emergencyToCallback);
-    callback(false, "Emergency not found.", 500);
-  }
-  emergencyToCallback[emergencyID](canHandle);
-  if (!canHandle) {
-    expireLocation(emergencyID,true,rejectedMessage,callback);
-    emergencyToDispatch[emergencyID] = dispatchRejected;
-  } else {
-    callback(true,"Success.",200);
-  }
+function acceptDispatch(emergencyID, canHandle, callback) {
+    if (!emergencyToCallback.hasOwnProperty(emergencyID)) {
+        console.error("Trying to access non-existant key:", emergencyID, "in dictionary", emergencyToCallback);
+        callback(false, "Emergency not found.", 500);
+    }
+    emergencyToCallback[emergencyID](canHandle);
+    if (!canHandle) {
+        expireLocation(emergencyID, true, rejectedMessage, callback);
+        emergencyToDispatch[emergencyID] = dispatchRejected;
+    } else {
+        callback(true, "Success.", 200);
+    }
 }
 
 function getDispatchStatus(emergencyID) {
-  return emergencyToDispatch[emergencyID];
+    return emergencyToDispatch[emergencyID];
 }
-
 
 function getLocationJSON(emergencyID) {
-  const address = emergencyToAddress[emergencyID];
-  const latLng = emergencyToLatLng[emergencyID];
-  if (!address || !latLng) {
-    return undefined
-  }
-  return JSON.stringify({
-    "address": address,
-    "latLng": latLng
-  })
+    const address = emergencyToAddress[emergencyID];
+    const latLng = emergencyToLatLng[emergencyID];
+    if (!address || !latLng) {
+        return undefined
+    }
+    return JSON.stringify({
+        "address": address,
+        "latLng": latLng
+    })
 }
 
-function expireLocation(emergencyID,wasDispatcher,reason,callback) {
-  var reciever;
-  if (wasDispatcher) {
-    reciever = emergencyToPhoneNumber[emergencyID];
-  } else {
-    reciever = process.env.DISPATCH_NUMBER;
-  }
+function expireLocation(emergencyID, wasDispatcher, reason, callback) {
+    var reciever;
+    if (wasDispatcher) {
+        reciever = emergencyToPhoneNumber[emergencyID];
+    } else {
+        reciever = process.env.DISPATCH_NUMBER;
+    }
 
-  twilioClient.messages.create({
-    from: process.env.TWILIO_NUMBER,
-    to: reciever,
-    body: reason + doNotReply
-  }).then((messsage) => callback(true, "Success.", 200))
-  .catch((messsage) => {console.error(message); callback(false, "Internal server error.", 500)});
+    twilioClient.messages.create({
+            from: process.env.TWILIO_NUMBER,
+            to: reciever,
+            body: reason + doNotReply
+        }).then((messsage) => callback(true, "Success.", 200))
+        .catch((messsage) => {
+            console.error(message);
+            callback(false, "Internal server error.", 500)
+        });
 
-  delete emergencyToCallback[emergencyID];
-  emergencyToDispatch[emergencyID] = dispatchEnded;
-  delete emergencyToAddress[emergencyID];
-  delete emergencyToPhoneNumber[emergencyID];
-  delete emergencyToLatLng[emergencyID];
+    delete emergencyToCallback[emergencyID];
+    emergencyToDispatch[emergencyID] = dispatchEnded;
+    delete emergencyToAddress[emergencyID];
+    delete emergencyToPhoneNumber[emergencyID];
+    delete emergencyToLatLng[emergencyID];
 }
 
 module.exports = {
-  handleLatLng,
-  handleAddress,
-  getLocationJSON,
-  expireLocation,
-  prepareDispatch,
-  acceptDispatch,
-  getDispatchStatus
+    handleLatLng,
+    handleAddress,
+    getLocationJSON,
+    expireLocation,
+    prepareDispatch,
+    acceptDispatch,
+    getDispatchStatus
 };
