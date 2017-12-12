@@ -48,7 +48,7 @@ function handleLatLng(emergencyID, latLng, callback) {
         emergencyToLatLng[emergencyID] = latLng;
         twilioClient.messages.create({
             from: process.env.TWILIO_NUMBER,
-            to: process.env.BEN_NUMBER,
+            to: process.env.DISPATCH_NUMBER,
             body: "This text is sent to report an opioid overdose at " + address + ". This is emergency " + emergencyID +
               ". If you are able to handle to this emergency, please respond \"yes " +  emergencyID.toLowerCase() + "\"." +
               " Otherwise, please respond \"no " +  emergencyID.toLowerCase() + "\" if you are unable to handle this emergency."
@@ -72,7 +72,7 @@ function handleAddress(emergencyID, address, zipcode, callback) {
   emergencyToAddress[emergencyID] = formatted.join()
   twilioClient.messages.create({
       from: process.env.TWILIO_NUMBER,
-      to: process.env.BEN_NUMBER,
+      to: process.env.DISPATCH_NUMBER,
       body: "Emergency " + emergencyID + " has recieved an updated address: " + address + ". Zipcode: " + zipcode +
         "." + doNotReply
     }).then((messsage) => callback(true, "Success.", 200))
@@ -150,7 +150,7 @@ function expireLocation(emergencyID,wasDispatcher,reason,callback) {
   if (wasDispatcher) {
     reciever = emergencyToPhoneNumber[emergencyID];
   } else {
-    reciever = process.env.BEN_NUMBER;
+    reciever = process.env.DISPATCH_NUMBER;
   }
 
   twilioClient.messages.create({
