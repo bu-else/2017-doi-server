@@ -24,8 +24,7 @@ function makeByDevice(deviceID) {
     return testID;
   }
 
-  emergencyID = deviceToEmergency[deviceID];
-  if (emergencyID && emergencyToDevice[emergencyID]) {
+  if (deviceToEmergency[deviceID]) {
     throw "Device already has an emergency";
   }
 
@@ -75,8 +74,7 @@ function endByEmergency(emergencyID) {
   // We don't free up usedEmergencyID because it has already been used and will never be used again.
   deviceID = emergencyToDevice[emergencyID];
   delete emergencyToDevice[emergencyID];
-  // We do not delete deviceToEmergency because it might be used by people who want to check up on the status
-  // of the emergency after the emergency has ended. 
+  delete deviceToEmergency[deviceID]
   delete emergencyToStage[emergencyID];
 }
 
