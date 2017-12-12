@@ -7,8 +7,11 @@ const testDevice = "computer-id";
 
 // No one should ever generate the testID except for testing purposes.
 var usedEmergencyID = {testID:true};
-
 var deviceToEmergency = {};
+// The archive is like deviceToEmergency, but is not deleted at the end, so that checking the status
+// can be done after the emergency has ended.
+var dToEArchive = {};
+
 var emergencyToDevice = {};
 var emergencyToStage = {};
 
@@ -20,6 +23,7 @@ function makeByDevice(deviceID) {
     console.log("Generating the test ID");
     emergencyID = testID;
     deviceToEmergency[deviceID] = emergencyID;
+    dToEArchive[deviceID] = emergencyID;
     emergencyToDevice[emergencyID] = deviceID;
     return testID;
   }
@@ -44,6 +48,7 @@ function makeByDevice(deviceID) {
   
   usedEmergencyID[emergencyID] = true;
   deviceToEmergency[deviceID] = emergencyID;
+  dToEArchive[deviceID] = emergencyID;
   emergencyToDevice[emergencyID] = deviceID;
   return emergencyID;
 }
@@ -52,6 +57,14 @@ function getEmergencyByDevice(deviceID) {
   emergencyID = deviceToEmergency[deviceID];
   if (!emergencyID) {
     throw "Getting undefined ID.";
+  }
+  return emergencyID;
+}
+
+function getEmergencyFromArchive(deviceID) {
+  emergencyID = dToEArchive[deviceID];
+  if (!emergencyID) {
+    throw "Getting undefined ID from archive."
   }
   return emergencyID;
 }
@@ -82,6 +95,7 @@ module.exports = {
     makeByDevice,
     getEmergencyByDevice,
     setStageByEmergency,
-    endByEmergency
+    endByEmergency,
+    getEmergencyFromArchive
 };
 

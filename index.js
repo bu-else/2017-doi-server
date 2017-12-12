@@ -195,8 +195,12 @@ function getDispatch(deviceID, response, callback) {
     return;
   }
 
-  emergencyID = tryGetEmergencyID(deviceID, callback);
-  if (!emergencyID) {
+  var emergencyID;
+  try {
+    emergencyID = idGen.getEmergencyFromArchive(deviceID);
+  } catch (e) {
+    console.error(e);
+    callback(false, "Could not find emergency.", 404);
     return;
   }
 
