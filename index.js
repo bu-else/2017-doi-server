@@ -56,7 +56,7 @@ const requestHandler = (request, response) => {
             break;
 
         case "dispatch":
-            getDispatch(URL_GET["deviceID"], response, callback);
+            getDispatch(URL_GET["deviceID"], URL_GET["emergencyID"], response, callback);
             break;
 
         case "fetch":
@@ -190,18 +190,19 @@ function prepAddress(deviceID, zipcode, rawAddress, callback) {
 }
 
 function getDispatch(deviceID, response, callback) {
-    if (!deviceID) {
+    if (!deviceID && !emergencyID) {
         callback(false, "Invalid request.", 400);
         return;
     }
 
-    var emergencyID;
-    try {
-        emergencyID = idGen.getEmergencyFromArchive(deviceID);
-    } catch (e) {
-        console.error(e);
-        callback(false, "Could not find emergency.", 404);
-        return;
+    if (!emergencyID) {
+        try {
+            emergencyID = idGen.getEmergencyFromArchive(deviceID);
+        } catch (e) {
+            console.error(e);
+            callback(false, "Could not find emergency.", 404);
+            return;
+        }
     }
 
     response.end(responder.getDispatchStatus(emergencyID));
