@@ -189,7 +189,7 @@ function prepAddress(deviceID, zipcode, rawAddress, callback) {
 
 }
 
-function getDispatch(deviceID, response, callback) {
+function getDispatch(deviceID, emergencyID, response, callback) {
     if (!deviceID && !emergencyID) {
         callback(false, "Invalid request.", 400);
         return;
