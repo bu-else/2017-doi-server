@@ -224,7 +224,7 @@ function fetchAddress(deviceID, emergencyID, response, callback) {
 
     json = responder.getLocationJSON(emergencyID);
     if (!json) {
-        callback(false, "Location not found.", 500);
+        callback(false, "Location not found.", 404);
         return;
     }
     response.setHeader('Content-Type', 'application/json');
