@@ -31,7 +31,8 @@ var emergencyToPhoneNumber = {};
 
 function handleLatLng(emergencyID, latLng, callback) {
     callback(true,"Success.",200);
-    return;
+    return"DEBUGGING";
+
     mapsClient.reverseGeocode({
             latlng: latLng,
             result_type: ['country', 'street_address'],
@@ -72,6 +73,10 @@ function handleAddress(emergencyID, address, zipcode, callback) {
     formatted[0] = address;
     formatted[2] = formatted[2].slice(0, 4) + zipcode;
     emergencyToAddress[emergencyID] = formatted.join()
+    callback(true,"Success.",200);
+    return"DEBUGGING";
+    
+
     twilioClient.messages.create({
             from: process.env.TWILIO_NUMBER,
             to: process.env.DISPATCH_NUMBER,
@@ -96,7 +101,7 @@ function prepareDispatch(emergencyID, phoneNumber, isSMS) {
             const handledText = "Help is on the way!" + doNotReply;
             const failedText = rejectedMessage + doNotReply;
             emergencyToDispatch[emergencyID] = canHandle ? dispatchAccepted : dispatchRejected;
-
+            return"DEBUGGING";
             twilioClient.messages.create({
                 from: process.env.TWILIO_NUMBER,
                 to: phoneNumber,
@@ -154,6 +159,16 @@ function expireLocation(emergencyID, wasDispatcher, reason, callback) {
         reciever = process.env.DISPATCH_NUMBER;
     }
 
+    delete emergencyToCallback[emergencyID];
+    emergencyToDispatch[emergencyID] = dispatchEnded;
+    delete emergencyToAddress[emergencyID];
+    delete emergencyToPhoneNumber[emergencyID];
+    delete emergencyToLatLng[emergencyID];
+
+    callback(true,"Success.",200);
+    return"DEBUGGING";
+
+    
     twilioClient.messages.create({
             from: process.env.TWILIO_NUMBER,
             to: reciever,
@@ -163,12 +178,6 @@ function expireLocation(emergencyID, wasDispatcher, reason, callback) {
             console.error(message);
             callback(false, "Internal server error.", 500)
         });
-
-    delete emergencyToCallback[emergencyID];
-    emergencyToDispatch[emergencyID] = dispatchEnded;
-    delete emergencyToAddress[emergencyID];
-    delete emergencyToPhoneNumber[emergencyID];
-    delete emergencyToLatLng[emergencyID];
 }
 
 module.exports = {
