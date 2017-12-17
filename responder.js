@@ -225,7 +225,6 @@ function expireLocation(emergencyID, wasDispatcher, reason, callback) {
 
 module.exports = {
     handleLatLng,
-    handleAddress,
     getLocationJSON,
     expireLocation,
     prepareDispatch,
