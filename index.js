@@ -38,11 +38,15 @@ const requestHandler = (request, response) => {
 
     switch (result[1]) {
         case "start-call":
-            success = prepLatLng(URL_GET["deviceID"], URL_GET["LatLng"], URL_GET["From"], false, callback);
+            prepLatLng(URL_GET["deviceID"], URL_GET["LatLng"], URL_GET["From"], false, callback);
             break;
 
         case "address":
             prepAddress(URL_GET["deviceID"], URL_GET["Zipcode"], URL_GET["Address"], callback);
+            break;
+
+        case "update-latlng":
+            prepUpdateLatLng(URL_GET["deviceID"], URL_GET["LatLng"], callback);
             break;
 
         case "end":
@@ -104,7 +108,15 @@ function smsHandler(response, body, phoneNumber) {
                 callback(false, "Invalid request.", 400);
                 return;
             }
-            success = prepLatLng(result[1], result[2], phoneNumber, true, callback);
+            prepLatLng(result[1], result[2], phoneNumber, true, callback);
+            break;
+
+        case "update-latlng":
+            if (result.length != 3) {
+                callback(false, "Invalid request.", 400);
+                return;
+            }
+            prepUpdateLatLng(result[1], result[2], callback);
             break;
 
         case "address":
@@ -161,6 +173,28 @@ function prepLatLng(deviceID, latLng, phoneNumber, isSMS, callback) {
         });
     }, expirationTime);
     return true;
+}
+
+function prepUpdateLatLng(deviceID, latLng, callback) {
+    if (!deviceID || !latLng) {
+        callback(false, "Invalid request.", 400);
+        return;
+    }   
+
+    const emergencyID = tryGetEmergencyID(deviceID, callback);
+    if (!emergencyID) {
+        return;
+    }
+
+    try {
+        idGen.setStageByEmergency(emergencyID, stageAddress);
+    } catch (e) {
+        console.error(e);
+        callback(false, "Internal server error.", 500);
+        return;
+    }
+
+    responder.updateLatLng(emergencyID, latLng, callback);
 }
 
 function prepAddress(deviceID, zipcode, rawAddress, callback) {

@@ -30,9 +30,6 @@ var emergencyToCallback = {};
 var emergencyToPhoneNumber = {};
 
 function handleLatLng(emergencyID, latLng, callback) {
-    callback(true,"Success.",200);
-    return"DEBUGGING";
-
     mapsClient.reverseGeocode({
             latlng: latLng,
             result_type: ['country', 'street_address'],
@@ -49,12 +46,54 @@ function handleLatLng(emergencyID, latLng, callback) {
                 const address = response.json.results[0]["formatted_address"];
                 emergencyToAddress[emergencyID] = address;
                 emergencyToLatLng[emergencyID] = latLng;
+
+                callback(true,"Success.",200);
+                return"DEBUGGING";
                 twilioClient.messages.create({
                         from: process.env.TWILIO_NUMBER,
                         to: process.env.DISPATCH_NUMBER,
                         body: "This text is sent to report an opioid overdose at " + address + ". This is emergency " + emergencyID +
                             ". If you are able to handle to this emergency, please respond \"yes " + emergencyID.toLowerCase() + "\"." +
                             " Otherwise, please respond \"no " + emergencyID.toLowerCase() + "\" if you are unable to handle this emergency."
+                    }).then((messsage) => callback(true, "Success.", 200))
+                    .catch((messsage) => callback(false, "Internal server error.", 500));
+            } else {
+                console.log(err)
+                callback(false, "Internal server error.", 500);
+            }
+        }
+    )
+}
+
+function updateLatLng(emergencyID,latlng,callback) {
+        mapsClient.reverseGeocode({
+            latlng: latLng,
+            result_type: ['country', 'street_address'],
+            location_type: ['ROOFTOP', 'APPROXIMATE', "RANGE_INTERPOLATED", "APPROXIMATE"],
+            language: "EN"
+        },
+        function(err, response) {
+            if (Object.keys(response.json.results).length == 0) {
+                console.log("Empty Google Maps response.");
+                callback(false, "Internal server error.", 500);
+                return;
+            }
+            if (!err) {
+                const address = response.json.results[0]["formatted_address"];
+                emergencyToAddress[emergencyID] = address;
+                emergencyToLatLng[emergencyID] = latLng;
+
+                callback(true,"Success.",200);
+                return"DEBUGGING";
+                twilioClient.messages.create({
+                        from: process.env.TWILIO_NUMBER,
+                        to: process.env.DISPATCH_NUMBER,
+                        body: "This text is sent to report an opioid overdose at " + 
+                            address + ". Located at latitude, longitude of: " + latlng +
+                            "\nThis is emergency " + emergencyID + 
+                            ". If you are able to handle to this emergency, please respond \"yes " +
+                            emergencyID.toLowerCase() + "\"." + " Otherwise, please respond \"no " + 
+                            emergencyID.toLowerCase() +  "\" if you are unable to handle this emergency."
                     }).then((messsage) => callback(true, "Success.", 200))
                     .catch((messsage) => callback(false, "Internal server error.", 500));
             } else {
@@ -80,8 +119,9 @@ function handleAddress(emergencyID, address, zipcode, callback) {
     twilioClient.messages.create({
             from: process.env.TWILIO_NUMBER,
             to: process.env.DISPATCH_NUMBER,
-            body: "Emergency " + emergencyID + " has recieved an updated address: " + address + ". Zipcode: " + zipcode +
-                "." + doNotReply
+            body: "Emergency " + emergencyID + " has recieved an updated address: " + 
+            address + ". Located at latitude, longitude of: " + latlng +
+                "\n" + doNotReply
         }).then((messsage) => callback(true, "Success.", 200))
         .catch((messsage) => callback(false, "Internal server error.", 500));
 }
@@ -168,7 +208,7 @@ function expireLocation(emergencyID, wasDispatcher, reason, callback) {
     callback(true,"Success.",200);
     return"DEBUGGING";
 
-    
+
     twilioClient.messages.create({
             from: process.env.TWILIO_NUMBER,
             to: reciever,
@@ -187,5 +227,6 @@ module.exports = {
     expireLocation,
     prepareDispatch,
     acceptDispatch,
-    getDispatchStatus
+    getDispatchStatus,
+    updateLatLng
 };
