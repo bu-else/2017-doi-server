@@ -37,7 +37,7 @@ const requestHandler = (request, response) => {
     URL_GET = buildURL_GET(request.url.toString())
 
     switch (result[1]) {
-        case "latlng":
+        case "start-call":
             success = prepLatLng(URL_GET["deviceID"], URL_GET["LatLng"], URL_GET["From"], false, callback);
             break;
 
@@ -99,7 +99,7 @@ function smsHandler(response, body, phoneNumber) {
     }
 
     switch (result[0]) {
-        case "latlng":
+        case "start-call":
             if (result.length != 3) {
                 callback(false, "Invalid request.", 400);
                 return;
