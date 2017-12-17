@@ -31,7 +31,7 @@ var emergencyToPhoneNumber = {};
 
 function handleLatLng(emergencyID, latLng, callback) {
     mapsClient.reverseGeocode({
-            latng: latLng,
+            latlng: latLng,
             result_type: ['country', 'street_address'],
             location_type: ['ROOFTOP', 'APPROXIMATE', "RANGE_INTERPOLATED", "APPROXIMATE"],
             language: "EN"
@@ -67,7 +67,7 @@ function handleLatLng(emergencyID, latLng, callback) {
 
 function updateLatLng(emergencyID,latLng,callback) {
         mapsClient.reverseGeocode({
-            latng: latLng,
+            latlng: latLng,
             result_type: ['country', 'street_address'],
             location_type: ['ROOFTOP', 'APPROXIMATE', "RANGE_INTERPOLATED", "APPROXIMATE"],
             language: "EN"
