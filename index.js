@@ -55,7 +55,7 @@ const requestHandler = (request, response) => {
             endEmergency(URL_GET["deviceID"], URL_GET["emergencyID"], reason, callback);
             break;
 
-        case "dispatch":
+        case "dispatch-status":
             getDispatch(URL_GET["deviceID"], URL_GET["emergencyID"], response, callback);
             break;
 
