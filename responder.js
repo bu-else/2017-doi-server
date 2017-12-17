@@ -28,6 +28,8 @@ var emergencyToLatLng = {};
 // to send a rejection in time.
 var emergencyToCallback = {};
 var emergencyToPhoneNumber = {};
+var emergencyToDescription = {};
+var emergencyToDescNumber = {};
 
 function handleLatLng(emergencyID, latLng, callback) {
     mapsClient.reverseGeocode({
@@ -46,6 +48,8 @@ function handleLatLng(emergencyID, latLng, callback) {
                 const address = response.json.results[0]["formatted_address"];
                 emergencyToAddress[emergencyID] = address;
                 emergencyToLatLng[emergencyID] = latLng;
+                emergencyToDescription[emergencyID] = "No updates from the caller yet.";
+                emergencyToDescNumber[emergencyID] = 0;
 
                 callback(true,"Success.",200);
                 return"DEBUGGING";
@@ -104,26 +108,22 @@ function updateLatLng(emergencyID,latLng,callback) {
     )
 }
 
-function handleAddress(emergencyID, address, zipcode, callback) {
-    // Because we are just receiving a street address and a zipcode, without a city, state or country
-    // we insert it carefully
-    oldAddress = emergencyToAddress[emergencyID];
-    formatted = oldAddress.split(",");
-    formatted[0] = address;
-    formatted[2] = formatted[2].slice(0, 4) + zipcode;
-    emergencyToAddress[emergencyID] = formatted.join()
-    callback(true,"Success.",200);
-    return"DEBUGGING";
+function updateDescription(emergencyID,newDescription,callback) {
+    if (!emergencyToDescription.hasOwnProperty(emergencyID)) {
+        console.error("Trying to access non-existant key:", emergencyID, "in dictionary", emergencyToDescription);
+        callback(false, "Emergency not found.", 500);
+        return;
+    }
     
-
-    twilioClient.messages.create({
-            from: process.env.TWILIO_NUMBER,
-            to: process.env.DISPATCH_NUMBER,
-            body: "Emergency " + emergencyID + " has recieved an updated address: " + 
-            address + ". Located at latitude, longitude of: " + latLng +
-                "\n" + doNotReply
-        }).then((messsage) => callback(true, "Success.", 200))
-        .catch((messsage) => callback(false, "Internal server error.", 500));
+    oldDescr =  emergencyToDescription[emergencyID];
+    oldNum = emergencyToDescNumber[emergencyID];
+    oldNum++;
+    updatedDescr = "Update " + oldNum + ":\n" + newDescription;
+    if (oldNum == 1) {
+        emergencyToDescription[emergencyID] = updatedDescr;
+    } else {
+        emergencyToDescription[emergencyID] = updatedDescr + "\n\n" + oldDescr;
+    }
 }
 
 function prepareDispatch(emergencyID, phoneNumber, isSMS) {
@@ -165,6 +165,7 @@ function acceptDispatch(emergencyID, canHandle, callback) {
     if (!emergencyToCallback.hasOwnProperty(emergencyID)) {
         console.error("Trying to access non-existant key:", emergencyID, "in dictionary", emergencyToCallback);
         callback(false, "Emergency not found.", 500);
+        return;
     }
     emergencyToCallback[emergencyID](canHandle);
     if (!canHandle) {
@@ -182,12 +183,14 @@ function getDispatchStatus(emergencyID) {
 function getLocationJSON(emergencyID) {
     const address = emergencyToAddress[emergencyID];
     const latLng = emergencyToLatLng[emergencyID];
+    const description = emergencyToDescription[emergencyID]
     if (!address || !latLng) {
         return undefined
     }
     return JSON.stringify({
         "address": address,
-        "latLng": latLng
+        "latLng": latLng,
+        "description": description
     })
 }
 

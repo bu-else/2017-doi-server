@@ -41,10 +41,6 @@ const requestHandler = (request, response) => {
             prepLatLng(URL_GET["deviceID"], URL_GET["LatLng"], URL_GET["From"], false, callback);
             break;
 
-        case "address":
-            prepAddress(URL_GET["deviceID"], URL_GET["Zipcode"], URL_GET["Address"], callback);
-            break;
-
         case "update-latlng":
             prepUpdateLatLng(URL_GET["deviceID"], URL_GET["LatLng"], callback);
             break;
@@ -119,14 +115,6 @@ function smsHandler(response, body, phoneNumber) {
             prepUpdateLatLng(result[1], result[2], callback);
             break;
 
-        case "address":
-            if (result.length != 4) {
-                callback(false, "Invalid request.", 400);
-                return;
-            }
-            prepAddress(result[1], result[2], result[3], callback);
-            break;
-
         case "end":
             if (result.length != 2) {
                 callback(false, "Invalid request.", 400);
@@ -195,31 +183,6 @@ function prepUpdateLatLng(deviceID, latLng, callback) {
     }
 
     responder.updateLatLng(emergencyID, latLng, callback);
-}
-
-function prepAddress(deviceID, zipcode, rawAddress, callback) {
-    if (!deviceID || !rawAddress || !zipcode) {
-        callback(false, "Invalid request.", 400);
-        return;
-    }
-    const address = rawAddress.replace(/\+/g, " ");
-
-
-    const emergencyID = tryGetEmergencyID(deviceID, callback);
-    if (!emergencyID) {
-        return;
-    }
-
-    try {
-        idGen.setStageByEmergency(emergencyID, stageAddress);
-    } catch (e) {
-        console.error(e);
-        callback(false, "Internal server error.", 500);
-        return;
-    }
-
-    responder.handleAddress(emergencyID, address, zipcode, callback);
-
 }
 
 function getDispatch(deviceID, emergencyID, response, callback) {
