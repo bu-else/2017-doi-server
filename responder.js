@@ -31,7 +31,7 @@ var emergencyToPhoneNumber = {};
 
 function handleLatLng(emergencyID, latLng, callback) {
     mapsClient.reverseGeocode({
-            latlng: latLng,
+            latng: latLng,
             result_type: ['country', 'street_address'],
             location_type: ['ROOFTOP', 'APPROXIMATE', "RANGE_INTERPOLATED", "APPROXIMATE"],
             language: "EN"
@@ -65,9 +65,9 @@ function handleLatLng(emergencyID, latLng, callback) {
     )
 }
 
-function updateLatLng(emergencyID,latlng,callback) {
+function updateLatLng(emergencyID,latLng,callback) {
         mapsClient.reverseGeocode({
-            latlng: latLng,
+            latng: latLng,
             result_type: ['country', 'street_address'],
             location_type: ['ROOFTOP', 'APPROXIMATE', "RANGE_INTERPOLATED", "APPROXIMATE"],
             language: "EN"
@@ -89,7 +89,7 @@ function updateLatLng(emergencyID,latlng,callback) {
                         from: process.env.TWILIO_NUMBER,
                         to: process.env.DISPATCH_NUMBER,
                         body: "This text is sent to report an opioid overdose at " + 
-                            address + ". Located at latitude, longitude of: " + latlng +
+                            address + ". Located at latitude, longitude of: " + latLng +
                             "\nThis is emergency " + emergencyID + 
                             ". If you are able to handle to this emergency, please respond \"yes " +
                             emergencyID.toLowerCase() + "\"." + " Otherwise, please respond \"no " + 
@@ -120,7 +120,7 @@ function handleAddress(emergencyID, address, zipcode, callback) {
             from: process.env.TWILIO_NUMBER,
             to: process.env.DISPATCH_NUMBER,
             body: "Emergency " + emergencyID + " has recieved an updated address: " + 
-            address + ". Located at latitude, longitude of: " + latlng +
+            address + ". Located at latitude, longitude of: " + latLng +
                 "\n" + doNotReply
         }).then((messsage) => callback(true, "Success.", 200))
         .catch((messsage) => callback(false, "Internal server error.", 500));
