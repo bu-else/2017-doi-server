@@ -38,29 +38,34 @@ const requestHandler = (request, response) => {
 
     switch (result[1]) {
         case "start-call":
-            prepLatLng(URL_GET["deviceID"], URL_GET["LatLng"], URL_GET["From"], false, callback);
+            prepLatLng(URL_GET["DeviceID"], URL_GET["LatLng"], URL_GET["From"], false, callback);
             break;
 
         case "update-latlng":
-            prepUpdateLatLng(URL_GET["deviceID"], URL_GET["LatLng"], callback);
+            prepUpdateLatLng(URL_GET["DeviceID"], URL_GET["LatLng"], callback);
             break;
 
-        case "end":
+        // case "add-description":
+        //     prepAddDescription(URL_GET["DeviceID"], URL_GET["Description"],callback);
+        //     break;
+
+        case "end-emergency":
             var reason;
-            if (URL_GET["deviceID"]) {
+            if (URL_GET["DeviceID"]) {
                 reason = reasonCaller;
             } else {
                 reason = reasonDispatcher;
             }
-            endEmergency(URL_GET["deviceID"], URL_GET["emergencyID"], reason, callback);
+            endEmergency(URL_GET["DeviceID"], URL_GET["EmergencyID"], reason, callback);
             break;
 
         case "dispatch-status":
-            getDispatch(URL_GET["deviceID"], URL_GET["emergencyID"], response, callback);
+            getDispatch(URL_GET["DeviceID"], URL_GET["EmergencyID"], response, callback);
             break;
 
-        case "fetch":
-            fetchAddress(URL_GET["deviceID"], URL_GET["emergencyID"], response, callback);
+
+        case "fetch-info":
+            fetchAddress(URL_GET["DeviceID"], URL_GET["EmergencyID"], response, callback);
             break;
 
         case "sms":
@@ -115,7 +120,7 @@ function smsHandler(response, body, phoneNumber) {
             prepUpdateLatLng(result[1], result[2], callback);
             break;
 
-        case "end":
+        case "end-emergency":
             if (result.length != 2) {
                 callback(false, "Invalid request.", 400);
                 return;
