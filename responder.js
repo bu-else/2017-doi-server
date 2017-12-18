@@ -230,5 +230,6 @@ module.exports = {
     prepareDispatch,
     acceptDispatch,
     getDispatchStatus,
-    updateLatLng
+    updateLatLng,
+    updateDescription
 };
