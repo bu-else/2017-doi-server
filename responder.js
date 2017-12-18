@@ -115,13 +115,14 @@ function updateDescription(emergencyID, newDescription, callback) {
 
   oldDescr = emergencyToDescription[emergencyID];
   oldNum = emergencyToDescNumber[emergencyID];
-  oldNum++;
   updatedDescr = "Update " + oldNum + ":\n" + newDescription;
-  if (oldNum == 1) {
+  if (oldNum == 0) {
     emergencyToDescription[emergencyID] = updatedDescr;
   } else {
     emergencyToDescription[emergencyID] = updatedDescr + "\n\n" + oldDescr;
   }
+  emergencyToDescNumber[emergencyID] += 1;
+
 
   callback(true, "Success.", 200);
   return "DEBUGGING";
