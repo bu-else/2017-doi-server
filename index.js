@@ -45,9 +45,9 @@ const requestHandler = (request, response) => {
             prepUpdateLatLng(URL_GET["DeviceID"], URL_GET["LatLng"], callback);
             break;
 
-        // case "add-description":
-        //     prepAddDescription(URL_GET["DeviceID"], URL_GET["Description"],callback);
-        //     break;
+        case "update-description":
+            prepUpdateDescription(URL_GET["DeviceID"], URL_GET["Description"],callback);
+            break;
 
         case "end-emergency":
             var reason;
@@ -62,7 +62,6 @@ const requestHandler = (request, response) => {
         case "dispatch-status":
             getDispatch(URL_GET["DeviceID"], URL_GET["EmergencyID"], response, callback);
             break;
-
 
         case "fetch-info":
             fetchAddress(URL_GET["DeviceID"], URL_GET["EmergencyID"], response, callback);
@@ -84,11 +83,6 @@ function smsHandler(response, body, phoneNumber) {
     callback = callbackCreator(response, true);
     const firstLine = result[0].split("+");
     if (strip(phoneNumber) == strip(process.env.DISPATCH_NUMBER) && firstLine.length >= 2) {
-        if (firstLine.length != 3) {
-            callback(false, "Invalid request.", 400);
-            return;
-        }
-
         switch (firstLine[0].toLowerCase()) {
             case "yes":
                 responder.acceptDispatch(firstLine[1].toUpperCase(), true, callback);
@@ -105,26 +99,14 @@ function smsHandler(response, body, phoneNumber) {
 
     switch (result[0]) {
         case "start-call":
-            if (result.length != 3) {
-                callback(false, "Invalid request.", 400);
-                return;
-            }
             prepLatLng(result[1], result[2], phoneNumber, true, callback);
             break;
 
         case "update-latlng":
-            if (result.length != 3) {
-                callback(false, "Invalid request.", 400);
-                return;
-            }
             prepUpdateLatLng(result[1], result[2], callback);
             break;
 
         case "end-emergency":
-            if (result.length != 2) {
-                callback(false, "Invalid request.", 400);
-                return;
-            }
             // Ending by sms is only supported on the caller side
             endEmergency(result[1], undefined, reasonCaller, callback);
             break;
@@ -188,6 +170,20 @@ function prepUpdateLatLng(deviceID, latLng, callback) {
     }
 
     responder.updateLatLng(emergencyID, latLng, callback);
+}
+
+function prepUpdateDescription(deviceID, description, callback) {
+    if (!deviceID || ! description) {
+        callback(false, "Invalid request.", 400);
+        return;
+    }
+
+    const emergencyID = tryGetEmergencyID(deviceID, callback);
+    if (!emergencyID) {
+        return;
+    }
+
+    responder.updateDescription(emergencyID,description,callback);
 }
 
 function getDispatch(deviceID, emergencyID, response, callback) {
