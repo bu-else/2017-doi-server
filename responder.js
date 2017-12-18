@@ -49,7 +49,7 @@ function handleLatLng(emergencyID, latLng, callback) {
         emergencyToAddress[emergencyID] = address;
         emergencyToLatLng[emergencyID] = latLng;
         emergencyToDescription[emergencyID] = "No updates from the caller yet.";
-        emergencyToDescNumber[emergencyID] = 0;
+        emergencyToDescNumber[emergencyID] = 1;
 
         callback(true, "Success.", 200);
         return "DEBUGGING";
@@ -116,7 +116,7 @@ function updateDescription(emergencyID, newDescription, callback) {
   oldDescr = emergencyToDescription[emergencyID];
   oldNum = emergencyToDescNumber[emergencyID];
   updatedDescr = "Update " + oldNum + ":\n" + newDescription;
-  if (oldNum == 0) {
+  if (oldNum == 1) {
     emergencyToDescription[emergencyID] = updatedDescr;
   } else {
     emergencyToDescription[emergencyID] = updatedDescr + "\n\n" + oldDescr;
