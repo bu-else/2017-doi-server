@@ -338,7 +338,7 @@ function buildURL_GET(urlString) {
 }
 
 function strip(phoneNumber) {
-  return phoneNumber.replace(/ /g, "").replace(/\(/g, "").replace(/\)/g, "").replace(/\-/g, "");
+  return phoneNumber.replace(/ /g, "").replace(/\(/g, "").replace(/\)/g, "").replace(/\-/g, "").replace(/\+/g, "");
 }
 
 const server = http.createServer(requestHandler);
