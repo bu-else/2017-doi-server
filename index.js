@@ -306,8 +306,6 @@ function callbackCreator(response, isSMS) {
       }
       called = true;
 
-      console.log(code);
-      response.statusCode = code;
       response.writeHead(code, text, {
         'Content-Length': Buffer.byteLength(text),
         'Content-Type': 'text/plain'
