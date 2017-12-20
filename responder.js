@@ -177,8 +177,8 @@ function acceptDispatch(emergencyID, canHandle, callback) {
   }
   emergencyToCallback[emergencyID](canHandle);
   if (!canHandle) {
-    expireLocation(emergencyID, true, rejectedMessage, callback);
     emergencyToDispatch[emergencyID] = dispatchRejected;
+    expireLocation(emergencyID, true, rejectedMessage, callback);
   } else {
     callback(true, "Success.", 200);
   }

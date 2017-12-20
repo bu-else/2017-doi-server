@@ -90,9 +90,7 @@ function smsHandler(response, body, phoneNumber) {
 
   callback = callbackCreator(response, true);
   const firstLine = result[0].split("+");
-  console.log(strip(phoneNumber),strip(process.env.DISPATCH_NUMBER));
   if (strip(phoneNumber) == strip(process.env.DISPATCH_NUMBER) && firstLine.length >= 2) {
-    console.log("CALLED",firstLine.toLowerCase());
     switch (firstLine[0].toLowerCase()) {
       case "yes":
         responder.acceptDispatch(firstLine[1].toUpperCase(), true, callback);
