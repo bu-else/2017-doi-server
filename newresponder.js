@@ -12,6 +12,12 @@ const dispatchEnded = "Ended";
 
 const rejectedMessage = "The dispatcher is unable to respond to your request. Please call 911!"
 
+const twilioClient = require('twilio')(
+  process.env.TWILIO_SID,
+  process.env.TWILIO_TOKEN
+);
+
+
 class Responder {
   constructor(mapsReverseGeocode,twilioCreateMessage) {
     this.mapsReverseGeocode = mapsReverseGeocode;
@@ -30,6 +36,8 @@ class Responder {
   }
 
   handleLatLng(emergencyID, latLng, callback) {
+    // Save the context for after the callback
+    const _this = this;
     this.mapsReverseGeocode({
         latlng: latLng,
         result_type: ['country', 'street_address'],
@@ -44,20 +52,29 @@ class Responder {
         }
         if (!err) {
           const address = response.json.results[0]["formatted_address"];
-          this.emergencyToAddress[emergencyID] = address;
-          this.emergencyToLatLng[emergencyID] = latLng;
-          this.emergencyToDescription[emergencyID] = "No updates from the caller yet.";
-          this.emergencyToDescNumber[emergencyID] = 1;
-
-          this.twilioCreateMessage({
+          _this.emergencyToAddress[emergencyID] = address;
+          _this.emergencyToLatLng[emergencyID] = latLng;
+          _this.emergencyToDescription[emergencyID] = "No updates from the caller yet.";
+          _this.emergencyToDescNumber[emergencyID] = 1;
+          twilioClient.messsage.create({
             from: process.env.TWILIO_NUMBER,
             to: process.env.DISPATCH_NUMBER,
-            body: "This text is sent to report an opioid overdose at " + address + ". This is emergency " +
-              emergencyID + ". This is latitude, longitude: " + latLng +
-              ". If you are able to handle to this emergency, please respond \"yes " + emergencyID +
-              "\". Otherwise, please respond \"no " + emergencyID + "\" if you are unable to handle this emergency."
-          }).then((messsage) => callback(true, "Success.", 200))
-          .catch((messsage) => callback(false, "Internal server error.", 500));
+            body:"HELLO"});
+          _this.twilioCreateMessage({
+            from: process.env.TWILIO_NUMBER,
+            to: process.env.DISPATCH_NUMBER,
+            body:"HELLO"});
+          callback(true, "Success.", 200);
+
+          // _this.twilioCreateMessage({
+          //   from: process.env.TWILIO_NUMBER,
+          //   to: process.env.DISPATCH_NUMBER,
+          //   body: "This text is sent to report an opioid overdose at " + address + ". This is emergency " +
+          //     emergencyID + ". This is latitude, longitude: " + latLng +
+          //     ". If you are able to handle to this emergency, please respond \"yes " + emergencyID +
+          //     "\". Otherwise, please respond \"no " + emergencyID + "\" if you are unable to handle this emergency."
+          // }).then((messsage) => {console.log("HELLO");callback(true, "Success.", 200)})
+          // .catch((messsage) => {console.log("ERROR");callback(false, "Internal server error.", 500)});
         } else {
           console.log(err)
           callback(false, "Internal server error.", 500);

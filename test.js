@@ -2,10 +2,12 @@ class Tester {
   constructor(twilioClient, reverseGeocode) {
     this.twilioClient = twilioClient;
     this.reverseGeocode = reverseGeocode;
+    this.food = "FOOD";
   }
 
   handleLatLng(callback) {
     console.log(this.reverseGeocode(0));
+    console.log(this.food);
     callback(true);
   }
 }
