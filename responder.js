@@ -177,8 +177,11 @@ function acceptDispatch(emergencyID, canHandle, callback) {
   }
   emergencyToCallback[emergencyID](canHandle);
   if (!canHandle) {
-    emergencyToDispatch[emergencyID] = dispatchRejected;
     expireLocation(emergencyID, true, rejectedMessage, callback);
+    // HACK: Nothing should be done after the callback is called, but I could not figure out how to pass a status
+    // into a function that could be also called from index.js
+    // So we do that here.
+    emergencyToDispatch[emergencyID] = dispatchRejected;
   } else {
     callback(true, "Success.", 200);
   }
