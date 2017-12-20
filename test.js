@@ -15,11 +15,11 @@ co(function* () {
 
     url = "http://doi-server.herokuapp.com/start-call/?&DeviceID=computer-id&From=8576361412&LatLng=42.350259,-71.105717" 
     response = yield request(url); 
-    assertSuccess(true,response.statusCode,"Starting regular");
+    assertSuccess(true,response.statusCode,"Starting an emergency");
  
     url = "http://doi-server.herokuapp.com/start-call/?&DeviceID=computer-id&From=8576361412&LatLng=42.350259,-71.105717" 
     response = yield request(url); 
-    assertSuccess(false,response.statusCode,"Multiple starts");
+    assertSuccess(false,response.statusCode,"Multiple emergencies per device are not supported");
 
     url = "http://doi-server.herokuapp.com/update-latlng/?&DeviceID=computer-id&LatLng=42.345616,-71.104136"
     response = yield request(url); 
@@ -47,6 +47,19 @@ co(function* () {
     assertSuccess(true,response.statusCode, "Getting dispatch status using DeviceID");
     console.assert(response.body == "Ended", "Expecting ended status")
 
+    url = "http://doi-server.herokuapp.com/sms/?&EmergencyID=TEST&Body=yes+test&From=85763614"
+    response = yield request(url); 
+    assertSuccess(true,response.statusCode, "Accepting the emergency over sms");
+
+    url = "http://doi-server.herokuapp.com/sms/?&EmergencyID=TEST&Body=yes+test&From=85763614"
+    response = yield request(url); 
+    assertSuccess(false,response.statusCode, "Multiple yes/no are not accepted");
+
+    url = "http://doi-server.herokuapp.com/dispatch-status/?&DeviceID=computer-id"
+    response = yield request(url); 
+    assertSuccess(true,response.statusCode, "Getting dispatch status using DeviceID");
+    console.assert(response.body == "Accepted", "Expecting accepted status")
+
     url = "http://doi-server.herokuapp.com/start-call/?&DeviceID=computer-id&From=8576361412&LatLng=42.350259,-71.105717" 
     response = yield request(url); 
     assertSuccess(true,response.statusCode, "Starting a second emergency once the first has finished");
@@ -62,8 +75,6 @@ co(function* () {
     url = "http://doi-server.herokuapp.com/end-emergency/?&EmergencyID=TEST"
     response = yield request(url); 
     assertSuccess(true,response.statusCode, "Ending the emergency using EmergencyID");
-
-
  
 }).catch(function (err) {
     console.err(err);
