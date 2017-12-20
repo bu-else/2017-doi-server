@@ -306,12 +306,10 @@ function callbackCreator(response, isSMS) {
       }
       called = true;
 
-      if (!success) {
-        response.writeHead(code, text, {
-          'Content-Length': Buffer.byteLength(text),
-          'Content-Type': 'text/plain'
-        });
-      }
+      response.writeHead(code, text, {
+        'Content-Length': Buffer.byteLength(text),
+        'Content-Type': 'text/plain'
+      });
       response.end(text);
     }
   }
