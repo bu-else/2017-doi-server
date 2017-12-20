@@ -1,6 +1,8 @@
 // content of index.js
 const http = require('http');
 const port = process.env.PORT || 3000;
+const responder = require("./responder.js");
+const idGen = require("./idgenerator.js");
 const uuidv4 = require('uuid/v4');
 const Dotenv = require('dotenv');
 Dotenv.config({
@@ -15,10 +17,6 @@ const twilioClient = require('twilio')(
   process.env.TWILIO_SID,
   process.env.TWILIO_TOKEN
 );
-
-const responderClass = require("./newresponder.js");
-const responder = new responderClass.Responder(mapsClient.reverseGeocode,twilioClient.messages.create);
-const idGen = require("./idgenerator.js");
 
 const stageLatLng = 1;
 const stageAddress = 2;
