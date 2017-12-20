@@ -7,8 +7,6 @@ function assertSuccess(isSuccess,statusCode,testMessage) {
 
 // THIS WILL END YOUR CURRENT EMERGENCY UNDER computer-id. USE CAREFULLY.
 
-
-
 co(function* () {
     var url = "http://doi-server.herokuapp.com/end-emergency/?&DeviceID=computer-id"
     var response = yield request(url); 
@@ -37,6 +35,9 @@ co(function* () {
     url = "http://doi-server.herokuapp.com/fetch-info/?&DeviceID=computer-id"
     response = yield request(url); 
     assertSuccess(true,response.statusCode, "Fetching the emergency info using DeviceID");
+    // TODO: There should be a test to make sure returned info actually matches what we expect, but because this is end to end
+    // it is not a good idea.
+    // When these are unit tests (which they for sure should be), then this should be fixed.
 
     url = "http://doi-server.herokuapp.com/sms/?&EmergencyID=TEST&Body=yes+test&From=185763614"
     response = yield request(url); 
@@ -67,24 +68,7 @@ co(function* () {
     response = yield request(url); 
     assertSuccess(true,response.statusCode, "Rejecting the emergency over sms");
 
-    url = "http://doi-server.herokuapp.com/dispatch-status/?&DeviceID=computer-id"
-    response = yield request(url); 
-    assertSuccess(true,response.statusCode, "Getting dispatch status using DeviceID");
-    console.log(response.body)
-    // console.assert(response.body == "Rejected", "Expecting rejected status")
-
     url = "http://doi-server.herokuapp.com/end-emergency/?&EmergencyID=TEST"
     response = yield request(url); 
     assertSuccess(true,response.statusCode, "Ending the emergency using EmergencyID");
- 
-}).catch(function (err) {
-    console.err(err);
-});
-
-
-
-
-
-
-
-// // const url = "http://doi-server.herokuapp.com/dispatch-status/?&EmergencyID=TEST"
+})
