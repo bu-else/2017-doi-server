@@ -327,7 +327,7 @@ function buildURL_GET(urlString) {
     .toString()
     // get the query string
     .replace(/^.*?\?/, '')
-    // and remove any existing hash string (thanks, @vrijdenker)
+    // and remove any existing hash string (thanks, @vrijdenker on SE)
     .replace(/#.*$/, '')
     .split('&');
   for (var i = 0, l = query.length; i < l; i++) {
@@ -338,7 +338,11 @@ function buildURL_GET(urlString) {
 }
 
 function strip(phoneNumber) {
-  return phoneNumber.replace(/ /g, "").replace(/\(/g, "").replace(/\)/g, "").replace(/\-/g, "").replace(/\+/g, "");
+  return phoneNumber.replace(/ /g, "")
+    .replace(/\(/g, "")
+    .replace(/\)/g, "")
+    .replace(/\-/g, "")
+    .replace(/\+/g, "");
 }
 
 const server = http.createServer(requestHandler);

@@ -38,43 +38,43 @@ co(function* () {
     response = yield request(url); 
     assertSuccess(true,response.statusCode, "Fetching the emergency info using DeviceID");
 
-    url = "http://doi-server.herokuapp.com/end-emergency/?&DeviceID=computer-id"
-    response = yield request(url); 
-    assertSuccess(true,response.statusCode, "Ending the emergency using DeviceID");
-
-    url = "http://doi-server.herokuapp.com/dispatch-status/?&DeviceID=computer-id"
-    response = yield request(url); 
-    assertSuccess(true,response.statusCode, "Getting dispatch status using DeviceID");
-    console.assert(response.body == "Ended", "Expecting ended status")
-
-    url = "http://doi-server.herokuapp.com/sms/?&EmergencyID=TEST&Body=yes+test&From=85763614"
+    url = "http://doi-server.herokuapp.com/sms/?&EmergencyID=TEST&Body=yes+test&From=185763614"
     response = yield request(url); 
     assertSuccess(true,response.statusCode, "Accepting the emergency over sms");
 
-    url = "http://doi-server.herokuapp.com/sms/?&EmergencyID=TEST&Body=yes+test&From=85763614"
+    url = "http://doi-server.herokuapp.com/sms/?&EmergencyID=TEST&Body=yes+test&From=185763614"
     response = yield request(url); 
     assertSuccess(false,response.statusCode, "Multiple yes/no are not accepted");
 
-    url = "http://doi-server.herokuapp.com/dispatch-status/?&DeviceID=computer-id"
-    response = yield request(url); 
-    assertSuccess(true,response.statusCode, "Getting dispatch status using DeviceID");
-    console.assert(response.body == "Accepted", "Expecting accepted status")
+    // url = "http://doi-server.herokuapp.com/end-emergency/?&DeviceID=computer-id"
+    // response = yield request(url); 
+    // assertSuccess(true,response.statusCode, "Ending the emergency using DeviceID");
 
-    url = "http://doi-server.herokuapp.com/start-call/?&DeviceID=computer-id&From=8576361412&LatLng=42.350259,-71.105717" 
-    response = yield request(url); 
-    assertSuccess(true,response.statusCode, "Starting a second emergency once the first has finished");
+    // url = "http://doi-server.herokuapp.com/dispatch-status/?&DeviceID=computer-id"
+    // response = yield request(url); 
+    // assertSuccess(true,response.statusCode, "Getting dispatch status using DeviceID");
+    // console.assert(response.body == "Ended", "Expecting ended status")
 
-    url = "http://doi-server.herokuapp.com/dispatch-status/?&DeviceID=computer-id"
-    response = yield request(url); 
-    assertSuccess(true,response.statusCode, "Getting dispatch status using EmergencyID");
+    // url = "http://doi-server.herokuapp.com/dispatch-status/?&DeviceID=computer-id"
+    // response = yield request(url); 
+    // assertSuccess(true,response.statusCode, "Getting dispatch status using DeviceID");
+    // console.assert(response.body == "Accepted", "Expecting accepted status")
 
-    url = "http://doi-server.herokuapp.com/fetch-info/?&EmergencyID=TEST"
-    response = yield request(url); 
-    assertSuccess(true,response.statusCode, "Fetching the emergency info using EmergencyID");
+    // url = "http://doi-server.herokuapp.com/start-call/?&DeviceID=computer-id&From=8576361412&LatLng=42.350259,-71.105717" 
+    // response = yield request(url); 
+    // assertSuccess(true,response.statusCode, "Starting a second emergency once the first has finished");
 
-    url = "http://doi-server.herokuapp.com/end-emergency/?&EmergencyID=TEST"
-    response = yield request(url); 
-    assertSuccess(true,response.statusCode, "Ending the emergency using EmergencyID");
+    // url = "http://doi-server.herokuapp.com/dispatch-status/?&DeviceID=computer-id"
+    // response = yield request(url); 
+    // assertSuccess(true,response.statusCode, "Getting dispatch status using EmergencyID");
+
+    // url = "http://doi-server.herokuapp.com/fetch-info/?&EmergencyID=TEST"
+    // response = yield request(url); 
+    // assertSuccess(true,response.statusCode, "Fetching the emergency info using EmergencyID");
+
+    // url = "http://doi-server.herokuapp.com/end-emergency/?&EmergencyID=TEST"
+    // response = yield request(url); 
+    // assertSuccess(true,response.statusCode, "Ending the emergency using EmergencyID");
  
 }).catch(function (err) {
     console.err(err);
