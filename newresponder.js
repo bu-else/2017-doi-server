@@ -30,7 +30,7 @@ class Responder {
   }
 
   handleLatLng(emergencyID, latLng, callback) {
-    mapsReverseGeocode({
+    this.mapsReverseGeocode({
         latlng: latLng,
         result_type: ['country', 'street_address'],
         location_type: ['ROOFTOP', 'APPROXIMATE', "RANGE_INTERPOLATED", "APPROXIMATE"],
@@ -49,7 +49,7 @@ class Responder {
           this.emergencyToDescription[emergencyID] = "No updates from the caller yet.";
           this.emergencyToDescNumber[emergencyID] = 1;
 
-          twilioCreateMessage({
+          this.twilioCreateMessage({
             from: process.env.TWILIO_NUMBER,
             to: process.env.DISPATCH_NUMBER,
             body: "This text is sent to report an opioid overdose at " + address + ". This is emergency " +
@@ -67,7 +67,7 @@ class Responder {
   }
 
   updateLatLng(emergencyID, latLng, callback) {
-    mapsReverseGeocode({
+    this.mapsReverseGeocode({
         latlng: latLng,
         result_type: ['country', 'street_address'],
         location_type: ['ROOFTOP', 'APPROXIMATE', "RANGE_INTERPOLATED", "APPROXIMATE"],
@@ -84,7 +84,7 @@ class Responder {
           this.emergencyToAddress[emergencyID] = address;
           this.emergencyToLatLng[emergencyID] = latLng;
 
-          twilioCreateMessage({
+          this.twilioCreateMessage({
               from: process.env.TWILIO_NUMBER,
               to: process.env.DISPATCH_NUMBER,
               body: "Emergency: " + emergencyID + " has received an update location." +
@@ -118,7 +118,7 @@ class Responder {
     this.emergencyToDescNumber[emergencyID] += 1;
 
 
-    twilioCreateMessage({
+    this.twilioCreateMessage({
       from: process.env.TWILIO_NUMBER,
       to: process.env.DISPATCH_NUMBER,
       body: "Emergency: " + emergencyID + " has received an updated description:\n" + newDescription
@@ -141,7 +141,7 @@ class Responder {
         const failedText = rejectedMessage + doNotReply;
         this.emergencyToDispatch[emergencyID] = canHandle ? dispatchAccepted : dispatchRejected;
 
-        twilioCreateMessage({
+        this.twilioCreateMessage({
           from: process.env.TWILIO_NUMBER,
           to: phoneNumber,
           body: canHandle ? handledText : failedText
@@ -208,7 +208,7 @@ class Responder {
     delete emergencyToPhoneNumber[emergencyID];
     delete emergencyToLatLng[emergencyID];
 
-    twilioCreateMessage({
+    this.twilioCreateMessage({
         from: process.env.TWILIO_NUMBER,
         to: reciever,
         body: reason + doNotReply
