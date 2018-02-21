@@ -52,7 +52,7 @@ function handleLatLng(emergencyID, latLng, callback) {
         emergencyToDescNumber[emergencyID] = 1;
 
         callback(true, "Success.", 200);
-        return "DEBUGGING";
+        // return "DEBUGGING";
         twilioClient.messages.create({
             from: process.env.TWILIO_NUMBER,
             to: process.env.DISPATCH_NUMBER,
@@ -89,7 +89,7 @@ function updateLatLng(emergencyID, latLng, callback) {
         emergencyToLatLng[emergencyID] = latLng;
 
         callback(true, "Success.", 200);
-        return "DEBUGGING";
+        // return "DEBUGGING";
         twilioClient.messages.create({
             from: process.env.TWILIO_NUMBER,
             to: process.env.DISPATCH_NUMBER,
@@ -125,7 +125,7 @@ function updateDescription(emergencyID, newDescription, callback) {
 
 
   callback(true, "Success.", 200);
-  return "DEBUGGING";
+  // return "DEBUGGING";
   twilioClient.messages.create({
     from: process.env.TWILIO_NUMBER,
     to: process.env.DISPATCH_NUMBER,
@@ -148,7 +148,7 @@ function prepareDispatch(emergencyID, phoneNumber, isSMS) {
       const handledText = "Help is on the way!" + doNotReply;
       const failedText = rejectedMessage + doNotReply;
       emergencyToDispatch[emergencyID] = canHandle ? dispatchAccepted : dispatchRejected;
-      return "DEBUGGING";
+      // return "DEBUGGING";
       twilioClient.messages.create({
         from: process.env.TWILIO_NUMBER,
         to: phoneNumber,
@@ -220,7 +220,7 @@ function expireLocation(emergencyID, wasDispatcher, reason, callback) {
   delete emergencyToLatLng[emergencyID];
 
   callback(true, "Success.", 200);
-  return "DEBUGGING";
+  // return "DEBUGGING";
 
 
   twilioClient.messages.create({
